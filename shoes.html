@@ -73,7 +73,7 @@
   <script>
     const shoesList = document.getElementById("shoes-list");
 
-    fetch("http://localhost:5000/api/shoes")
+    fetch("https://wahuserver.onrender.com/api/shoes")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -94,7 +94,7 @@ if (product.moreImages && product.moreImages.length > 0) {
   imageUrl = product.moreImages[0].url || product.moreImages[0];
 } else if (product.image) {
   // Case: Cloudinary object OR string
-  imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+  imageUrl = product.image.url || `https://wahuserver.onrender.com/uploads/${product.image}`;
 }
 
           const original = product.originalprice || product.originalPrice;
@@ -165,3 +165,4 @@ if (product.moreImages && product.moreImages.length > 0) {
   </script>
 </body>
 </html>
+
