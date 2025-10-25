@@ -5,7 +5,7 @@ const addressTextEl = document.getElementById("addressText");
 let allProducts = [];
 
 // Fetch products
-fetch('http://localhost:5000/api/products')
+fetch('https://wahuserver.onrender.com/api/products')
   .then(res => res.json())
   .then(products => {
     allProducts = products;
@@ -34,7 +34,7 @@ function displayProducts(products) {
       product.moreImages?.[0]?.url || // Cloudinary multi-images
       product.moreImages?.[0] ||      // fallback array
       product.image?.url ||           // Cloudinary single image
-      (product.image ? `http://localhost:5000/uploads/${product.image}` : null) || // Local uploads
+      (product.image ? `https://wahuserver.onrender.com/uploads/${product.image}` : null) || // Local uploads
       "default-placeholder.png";      // Fallback
 
     const original = product.originalprice || product.originalPrice;
@@ -120,7 +120,7 @@ function toggleWishlist(productId) {
     return;
   }
 
-  fetch(`http://localhost:5000/api/wishlist/toggle`, {
+  fetch(`https://wahuserver.onrender.com/api/wishlist/toggle`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -137,3 +137,4 @@ function toggleWishlist(productId) {
     alert("Error adding to wishlist.");
   });
 }
+
