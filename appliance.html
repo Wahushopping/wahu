@@ -71,7 +71,7 @@
   <script>
     const homeApplianceList = document.getElementById("homeappliance-list");
 
-    fetch("http://localhost:5000/api/homeappliance")
+    fetch("https://wahuserver.onrender.com/api/homeappliance")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -164,3 +164,4 @@
   </script>
 </body>
 </html>
+
