@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>Profile</title>
+  <link rel="stylesheet" href="profile.css" />
+</head>
+
+<body>
+
+  <header>
+    <div class="logo"><img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg" style="width: 120px; padding-top: 10px; border-radius:5px; padding-left: 20px; height:40px;"></div>
+   
+  </header>
+
+  <div class="content">
+    <main class="form-page">
+      <div class="photo"><img src="image/9203764.png" alt="Profile Image"></div>
+      <div id="profileInfo"></div>
+      <br>
+
+      <a href="address.html" class="btn">Add / Update Address</a>
+      <br>
+      <a href="orders.html" class="btn"> My Orders</a>
+      <button onclick="logout()" style="margin-top: 20px;">Logout</button>
+
+      <br><br>
+      
+      <h3>Your Wishlist ❤️</h3>
+<div id="wishlist" class="wishlist-grid"></div>
+
+    </main>
+  </div>
+
+  <div class="div2">
+    <section class="trending-products">
+      <h2>Trending Products</h2>
+      <div class="product-grid" id="trending-list">
+        <!-- Trending products will load here -->
+      </div>
+
+      <div class="div50">
+        <h3>Feedback & Information</h3>
+        <a href="Conditions.html" style="color:rgb(27, 27, 27)"><h5>Terms and Condition</h5></a>
+        <a href="Privacy.html"style="color:rgb(27, 27, 27)"><h5>Privacy Policy</h5></a>
+        <a href="Return.html" style="color:rgb(27, 27, 27)"><h5>Return Policy</h5></a>
+        <a href="Help.html" style="color:rgb(27, 27, 27)"><h5>Help Center</h5></a>
+      </div>
+    </section>
+  </div>
+
+ <footer>
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="products.html" class="nav-item">
+        <i class="fas fa-box-open"></i>
+        <span>Products</span>
+      </a>
+      <a href="cart.html" class="nav-item">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+      </a>
+
+      <a href="orders.html" class="nav-item">
+        <i class="fas fa-receipt"></i>
+        <span>Orders</span>
+      </a>
+
+      <a href="login.html" class="nav-item" id="userLinks">
+        <span id="userLinks">Login </span>
+      </a>
+    </nav>
+  </footer>
+
+  <!-- ✅ Profile Script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("⚠️ Please log in first.");
+        window.location.href = "login.html";
+        return;
+      }
+
+     try {
+  const res = await fetch("http://localhost:5000/api/users/me", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    throw new Error("SessionExpired");
+  }
+
+  if (!res.ok) {
+    throw new Error("FetchFailed");
+  }
+
+  // ✅ Safely handle empty or bad JSON
+  const text = await res.text();
+  if (!text) {
+    throw new Error("EmptyResponse");
+  }
+  const user = JSON.parse(text);
+
+  localStorage.setItem("user", JSON.stringify(user));
+
+  const profileInfo = document.getElementById("profileInfo");
+  let addressHTML = "Not provided";
+
+  const a = user.address;
+  if (a && typeof a === "object") {
+    addressHTML = `
+      ${a.name || ""}, ${a.phone || ""}<br>
+      ${a.street || ""}, ${a.road || ""}, ${a.place || ""}<br>
+      ${a.city || ""}, ${a.state || ""} - ${a.pincode || ""}<br>
+      ${a.email || ""}
+    `;
+  }
+
+  profileInfo.innerHTML = `
+    <p><strong>${user.name}</strong></p>
+    <p><strong>Email:</strong> ${user.email}</p>
+    <p><strong>Address:</strong><br>${addressHTML}</p>
+  `;
+
+  
+
+
+  const userLinks = document.getElementById("userLinks");
+  userLinks.innerHTML = `
+  
+    <a href="profile.html"><i class="fas fa-user" style="color:green"></i><br><h5 style="color:white">Profile<h5></a>
+    
+  `;
+
+} catch (err) {
+  console.error("❌ Profile load failed:", err);
+
+  if (err.message === "SessionExpired") {
+    alert("Session expired. Please log in again.");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+  } else if (err.message === "EmptyResponse") {
+    alert("No user data returned. Please try again.");
+  } else {
+    alert("Something went wrong. Please try again later.\n" + err.message);
+  }
+}
+
+    });
+
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      alert("👋 Logged out");
+      window.location.href = "index.html";
+    }
+
+
+  const wishlistContainer = document.getElementById("wishlist");
+const token = localStorage.getItem("token");
+
+
+ // Cloudinary-only image handler
+      function getImageUrl(image) {
+        if (!image) return "default-placeholder.png";
+        if (typeof image === "object" && image.url) return image.url;
+        if (typeof image === "string" && image.startsWith("http")) return image;
+        return "default-placeholder.png";
+      }
+
+// ✅ Load wishlist
+async function loadWishlist() {
+  if (!token) {
+    wishlistContainer.innerHTML = `<p>Please login to see your wishlist.</p>`;
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/wishlist", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.items && data.items.length) {
+      wishlistContainer.innerHTML = "";
+
+      data.items.forEach(item => {
+        // Properly resolve Cloudinary or local image
+        const imgSrc = item.image?.url || item.image || "default-placeholder.png";
+
+        const card = document.createElement("div");
+        card.className = "wishlist-card";
+
+        card.innerHTML = `
+          <div class="wishlist-item" style="border:1px solid #ddd; padding:10px; border-radius:5px; text-align:center;">
+            <a href="product.html?id=${item.id}" style="text-decoration:none; color:black;">
+               <img src="${getImageUrl(item.image)}" 
+                alt="${item.name}" 
+                style="width: 100px; height: 100px; object-fit: cover;" />
+
+              <p style="font-size:14px; margin:5px 0;">${item.name}</p>
+              <p style="font-size:14px; font-weight:bold; margin:5px 0;">₹${item.price}</p>
+            </a>
+            <button onclick="removeFromWishlist('${item.id}')" 
+              style="font-size:12px; width:100%; padding:6px; background-color:#ff4d4d; color:white; border:none; border-radius:4px; cursor:pointer;">
+              Remove
+            </button>
+          </div>
+        `;
+
+        wishlistContainer.appendChild(card);
+      });
+
+    } else {
+      wishlistContainer.innerHTML = "<p>No items in wishlist.</p>";
+    }
+
+  } catch (err) {
+    console.error("❌ Failed to load wishlist:", err);
+    wishlistContainer.innerHTML = "<p>Failed to load wishlist.</p>";
+  }
+}
+
+async function removeFromWishlist(productId) {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please login to remove items from wishlist");
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/wishlist/remove/${productId}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert(data.message);  // "Removed from wishlist"
+      loadWishlist();       // Refresh wishlist without reload
+    } else {
+      alert(data.message || "Failed to remove item");
+    }
+
+  } catch (err) {
+    console.error("Remove wishlist error:", err);
+    alert("Server error. Please try again.");
+  }
+}
+
+
+// ✅ Toggle wishlist (add/remove)
+function toggleWishlist(product) {
+  if (!token) {
+    alert("Please login to add to wishlist");
+    window.location.href = "login.html";
+    return;
+  }
+
+  fetch("http://localhost:5000/api/wishlist/toggle", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      id: product._id,
+      name: product.name,
+      price: product.price,
+      image: product.image?.url || product.image // full Cloudinary URL
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      loadWishlist(); // refresh wishlist after toggle
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error updating wishlist.");
+    });
+}
+
+// Load wishlist on page load
+document.addEventListener("DOMContentLoaded", loadWishlist);
+
+
+  </script>
+
+  <!-- ✅ Trending Products Script -->
+  <script>
+    const trendingList = document.getElementById("trending-list");
+
+    fetch("http://localhost:5000/api/trending")
+      .then(res => res.json())
+      .then(products => {
+        if (!products.length) {
+          trendingList.innerHTML = "<p>No trending products found.</p>";
+          return;
+        }
+     
+        trendingList.innerHTML = "";
+        products.forEach(product => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+
+            // Image URL logic (Cloudinary or local)
+          let imageUrl = "default-placeholder.png";
+          if (product.moreImages && product.moreImages.length > 0) {
+            imageUrl = product.moreImages[0].url || product.moreImages[0];
+          } else if (product.image) {
+            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+          }
+
+          card.innerHTML = `
+            <a href="product.html?id=${product._id}">
+             <img src="${imageUrl}" alt="${product.title}" style="width: 100%; border-radius: 5px;" />
+              <p>${product.name || "Product"}</p>
+            </a>
+          `;
+          trendingList.appendChild(card);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading trending products:", err);
+        trendingList.innerHTML = "<p>Error loading trending products.</p>";
+      });
+  </script>
+
+</body>
+
+</html>

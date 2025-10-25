@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<title>My Orders - MiniShop</title>
+<link rel="stylesheet" href="order.css"/>
+<style>
+  h2 { padding-top: 70px; text-align: center; }
+  .status-tracker.collapsed { max-height: 40px; overflow: hidden; transition: max-height 0.3s ease; }
+  .status-tracker { display: flex; gap: 10px; margin: 10px 0; }
+  .step { display: flex; flex-direction: column; align-items: center; }
+  .step.active .circle { background-color: green; }
+  .step.pending .circle { background-color: orange; }
+  .circle { width: 15px; height: 15px; border-radius: 50%; background: #ccc; margin-bottom: 3px; }
+  .view-toggle-btn { margin-top: 5px; padding: 5px 10px; cursor: pointer; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+      <img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg" style="width: 100px; padding-top: 10px; border-radius:5px;">
+    </div>
+  <div style="display: flex; align-items: center;">
+    <i class="fas fa-location-dot" style="color: red; margin-right: 5px;"></i>
+    <div id="addressText" style="color: aliceblue; font-size: xx-small; padding-right: 20px; text-align: center;"></div>
+  </div>
+</header>
+
+<main class="form-page">
+  <h2>My Orders</h2>
+  <div id="orderList">Loading orders...</div>
+</main>
+
+<footer>
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i><span>Products</span></a>
+    <a href="cart.html" class="nav-item"><i class="fas fa-shopping-cart"></i><span>Cart</span></a>
+    <a href="orders.html" class="nav-item"><i class="fas fa-receipt" style="color: green;"></i><span>Orders</span></a>
+    <a href="login.html" class="nav-item" id="userLinks"><span>Login</span></a>
+  </nav>
+</footer>
+
+<script>
+const token = localStorage.getItem("token");
+const userLinks = document.getElementById("userLinks");
+const addressTextEl = document.getElementById("addressText");
+
+if(token){
+  userLinks.innerHTML = `<a href="profile.html"><i class="fas fa-user"></i><br>Profile</a>`;
+}else{
+  userLinks.innerHTML = `<a href="login.html"><i class="fas fa-user"></i><br>Login</a>`;
+}
+
+function changeAddress(){
+  const user = JSON.parse(localStorage.getItem("user") || null);
+  if(!user || !user.address?.city){
+    addressTextEl.innerHTML = `<button onclick="window.location.href='profile.html'" style="width: 120px; color: green; height: 35px;">Add Address</button>`;
+    return;
+  }
+  const a = user.address;
+  addressTextEl.innerHTML = `
+    <a href='address.html'>
+      ${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}<br/>
+      ${a.city}, ${a.state || ""} - ${a.pincode}<br/>
+    </a>
+  `;
+}
+window.addEventListener('DOMContentLoaded', changeAddress);
+
+function requestReturn(orderId, itemId) {
+  const reason = prompt("Enter return reason:");
+  if (!reason) return;
+
+  const method = prompt("Enter refund method (UPI / Bank):");
+  if (!method) return;
+
+  let upi = "";
+  let bank = {};
+
+  if (method.toLowerCase() === "upi") {
+    upi = prompt("Enter your UPI ID (e.g. user@upi):");
+    if (!upi) return alert("UPI ID is required for refund.");
+  } else if (method.toLowerCase() === "bank") {
+    bank.accountNumber = prompt("Enter your Bank Account Number:");
+    if (!bank.accountNumber) return alert("Account number required.");
+    bank.ifsc = prompt("Enter IFSC Code:");
+    if (!bank.ifsc) return alert("IFSC code required.");
+    bank.name = prompt("Enter Account Holder Name:");
+    if (!bank.name) return alert("Account holder name required.");
+  } else {
+    return alert("Invalid refund method. Please type 'UPI' or 'Bank'.");
+  }
+
+  // Normalize refundMethod for backend enum
+  const refundMethodEnum = method.toLowerCase() === 'upi' ? 'UPI' : 'Bank';
+
+  const body = {
+    itemId,
+    reason,
+    refundMethod: refundMethodEnum,
+    upi,
+    bank,
+  };
+
+  fetch(`http://localhost:5000/api/orders/${orderId}/return`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Return request failed");
+      return res.json();
+    })
+    .then((data) => {
+      alert("Return request submitted successfully!");
+      location.reload();
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("Error submitting return request.");
+    });
+}
+
+
+
+// Fetch orders
+fetch("http://localhost:5000/api/orders/my", {
+  method:"GET",
+  headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` }
+})
+.then(res => { if(!res.ok) throw new Error("Failed to fetch orders"); return res.json(); })
+.then(orders => {
+  const orderList = document.getElementById("orderList");
+  if(!Array.isArray(orders) || orders.length===0){ orderList.innerHTML="<p>No orders yet.</p>"; return; }
+
+  orderList.innerHTML = orders.map(order => `
+    <div style="border:1px solid #ddd; padding:10px; margin:10px 0;">
+      <p><strong>Placed on:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+      <p><strong>Address:</strong> ${order.address?.road || ""}, ${order.address?.street || ""}, ${order.address?.city || ""}, ${order.address?.state || ""}, ${order.address?.pincode || ""}</p>
+      <p><strong>Phone:</strong> ${order.address?.phone || ""}</p>
+      <p><strong>Total:</strong> ₹${order.total}</h4></p>
+      
+      ${order.items.map((item,index)=>`
+        <div style="display:flex; gap:10px; border:2px solid #ccc; padding:5px; border-radius:5px; margin-top:5px;">
+          <div style="width:150px;">
+            <img src="${item.image}" style="width:90px;height:95px;object-fit:cover;">
+            <p style="margin:0;"><strong>${item.name}</strong></p>
+            <p style="margin:0;">Qty: ${item.qty}</p>
+            <p style="margin:0;">Price:<strong> ₹${item.price}</strong></p>
+          </div>
+          <div style="flex:1;">
+            <div class="status-tracker-wrapper">
+
+           <div class="status-tracker collapsed" id="statusTracker-${order._id}-${index}">
+  <div class="step ${order.status==='Cancelled' || ['Ordered','Packed','Shipped','Out for Delivery','Delivered'].includes(order.status)?'active':''}">
+    <div class="circle"></div><span class="label">Ordered</span>
+  </div>
+  <div class="step ${order.status==='Cancelled' || ['Packed','Shipped','Out for Delivery','Delivered'].includes(order.status)?'active':''}">
+    <div class="circle"></div><span class="label">Packed</span>
+  </div>
+  <div class="step ${order.status==='Cancelled' || ['Shipped','Out for Delivery','Delivered'].includes(order.status)?'active':''}">
+    <div class="circle"></div><span class="label">Shipped</span>
+  </div>
+  <div class="step ${order.status==='Cancelled' || ['Out for Delivery','Delivered'].includes(order.status)?'active':''}">
+    <div class="circle"></div><span class="label">Out for Delivery</span>
+  </div>
+  <div class="step ${order.status==='Delivered'?'active':''}">
+    <div class="circle"></div><span class="label">Delivered</span>
+  </div>
+ 
+
+                ${item.returnRequested || item.returnStatus?`
+                  <div class="step ${item.returnStatus==='Approved'?'active':item.returnRequested?'pending':''}">
+                    <div class="circle"></div><span class="label">Return</span>
+                  </div>`:''}
+              </div>
+              <button class="view-toggle-btn" onclick="toggleStatusView('statusTracker-${order._id}-${index}',this)">View More</button>
+            </div>
+            <p style="margin:0; color:green;"><strong>Delivery Date:</strong> ${order.deliveryDate?new Date(order.deliveryDate).toLocaleDateString():'Not set'}</p>
+            ${item.returnStatus==='Approved'?`<p style="color:green;margin:0;">Return Approved</p>`:
+            item.returnStatus==='Rejected'?`<p style="color:red;margin:0;">Return Rejected</p>`:
+            item.returnRequested?`<p style="color:orange;margin:0;">Return Requested</p>`:
+            (order.status==='Delivered' && order.deliveryDate && (new Date()-new Date(order.deliveryDate))<=7*24*60*60*1000)?`
+              <button onclick="requestReturn('${order._id}','${item._id}')" style="margin-top:5px;padding:5px 10px;border:none;background:red;color:white;border-radius:3px;cursor:pointer;">Return</button>`:''}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+})
+.catch(err=>{console.error(err); document.getElementById("orderList").innerHTML="<p>Error loading orders.</p>";});
+
+function toggleStatusView(trackerId,btn){
+  const tracker = document.getElementById(trackerId);
+  if(!tracker||!btn)return;
+  tracker.classList.toggle('collapsed');
+  btn.textContent = tracker.classList.contains('collapsed')?'View More':'View Less';
+}
+</script>
+
+</body>
+</html>

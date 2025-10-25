@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>Checkout - WahuShop</title>
+  <link rel="stylesheet" href="checkout.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg"
+        style="width:100px; padding-top:7px; border-radius:5px; padding-left:20px;">
+    </div>
+  </header>
+
+  <main class="checkout-container" style="max-width:500px; margin:auto; padding-top: 80px;">
+    <h2>Confirm Your Order</h2>
+
+    <!-- Address -->
+    <section style="margin-bottom:20px;">
+      <h3>Shipping Address</h3>
+      <div id="addressInfo" style="background:#f0f0f0; padding:10px; border-radius:5px;"></div>
+      <button onclick="window.location.href='address.html'" style="margin-top:10px;">Change Address</button>
+    </section>
+
+    <!-- Order Items -->
+    <section id="orderItems" style="margin-bottom:20px;"></section>
+
+    <!-- Price Summary -->
+    <section>
+      <h3>Price Details</h3>
+      <p>Total: ₹<span id="total"></span></p>
+      <p>Discount: ₹<span id="discount"></span></p>
+      <p><strong>Payable: ₹ <span id="payable" style="color: rgb(47, 153, 15); font-size: large; font-weight: 20px;"></span></strong></p>
+    </section>
+
+    <button onclick="startPayment(checkoutData.finalAmount)">
+  Pay Now 
+</button>
+
+
+    <div id="orderStatus" style="margin-top:15px; color:green;"></div>
+  </main>
+
+   <!-- Add this in your HTML file -->
+  <footer>
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <i class="fas fa-home" style="color: green;"></i>
+        <span>Home</span>
+      </a>
+      <a href="products.html" class="nav-item">
+        <i class="fas fa-box-open"></i>
+        <span>Products</span>
+      </a>
+      <a href="cart.html" class="nav-item">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+      </a>
+
+      <a href="orders.html" class="nav-item">
+        <i class="fas fa-receipt"></i>
+        <span>Orders</span>
+      </a>
+
+      <a href="login.html" class="nav-item" id="userLinks">
+        <span id="userLinks">Login </span>
+      </a>
+    </nav>
+  </footer>
+
+ <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  const checkoutData = JSON.parse(sessionStorage.getItem("checkoutData") || "{}");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  
+  const addressInfo = document.getElementById("addressInfo");
+  const orderItems = document.getElementById("orderItems");
+
+  if (!checkoutData.cart || checkoutData.cart.length === 0) {
+    alert("Your cart is empty!");
+    window.location.href = "cart.html";
+  }
+
+  // Display Address
+  if (user && user.address && user.address.city) {
+    const a = user.address;
+    addressInfo.innerHTML = `
+      ${a.name || ""}<br>
+      ${a.street || ""} ${a.road || ""}, ${a.place || ""}<br>
+      ${a.city}, ${a.state} - ${a.pincode}<br>
+      Phone: ${a.phone}
+    `;
+  } else {
+    addressInfo.innerHTML = `<span style="color:red;">No address found.</span>`;
+  }
+
+  // Display Cart Items
+  checkoutData.cart.forEach(item => {
+    const div = document.createElement("div");
+    div.style.borderBottom = "1px solid #ccc";
+    div.style.padding = "10px 0";
+    div.innerHTML = `
+      <strong>${item.name}</strong><br/>
+      Size: ${item.size} | Qty: ${item.qty} <br/>
+      Price: ₹${item.price} | Subtotal: ₹${item.qty * item.price}
+    `;
+    orderItems.appendChild(div);
+  });
+
+  // Price Info
+  document.getElementById("total").textContent = checkoutData.total;
+  document.getElementById("discount").textContent = checkoutData.discount;
+  document.getElementById("payable").textContent = checkoutData.finalAmount;
+
+  // ✅ Save Order After Successful Payment
+  function placeCODOrder(paymentId) {
+    const a = user.address;
+    const fullAddress = `${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}, ${a.city}, ${a.state} - ${a.pincode}`;
+
+    const orderData = {
+      items: checkoutData.cart,
+      total: checkoutData.total,
+      discount: checkoutData.discount,
+      finalAmount: checkoutData.finalAmount,
+      paymentMethod: "Razorpay",
+      address: { ...a, fullAddress },
+      razorpayPaymentId: paymentId
+    };
+
+    fetch("http://localhost:5000/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(orderData)
+    })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("orderStatus").textContent =
+          "Payment successful! Order placed.";
+        sessionStorage.removeItem("checkoutData");
+        setTimeout(() => window.location.href = "orders.html", 2000);
+      })
+      .catch(err => {
+        alert("Order failed. Try again.");
+        console.error(err);
+      });
+  }
+
+ async function startPayment(totalAmount) {
+  try {
+    const res = await fetch("http://localhost:5000/api/razorpay/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: totalAmount })
+    });
+
+    const order = await res.json();
+
+    if (!order.id) {
+      alert("Failed to create order");
+      return;
+    }
+
+    const options = {
+      key: "rzp_live_RLHDh7PumgVdb8", // your Razorpay key
+      amount: order.amount,
+      currency: "INR",
+      name: "Wahu Store",
+      description: "Order Payment",
+      order_id: order.id,
+      method: {
+        upi: true, // disable UPI
+        card: true,
+        netbanking: true,
+        wallet: true
+      },
+      handler: function (response) {
+        console.log("Payment success:", response);
+        placeCODOrder(response.razorpay_payment_id);
+      },
+      modal: {
+        ondismiss: function () {
+          alert("Payment cancelled");
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+  } catch (err) {
+    alert("Failed to start payment.");
+    console.error("Payment start error:", err);
+  }
+}
+
+
+</script>
+<script>
+    const userLinks = document.getElementById("userLinks");
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      userLinks.innerHTML = `
+    
+    <a href="profile.html"><i class="fas fa-user"></i><br><h5>Profile<h5></a>
+    
+  `;
+    } else {
+      userLinks.innerHTML = `
+    
+    <a href="login.html"><i class="fas fa-user"></i><br><h5>Login</h5></a>
+    
+     `;
+    }
+
+    window.logout = function () {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      alert("Logged out");
+      window.location.href = "index.html";
+    };
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>WahuShop - Home Appliances</title>
+  <link rel="stylesheet" href="cata.css" />
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg" style="width: 100px; padding-top: 10px; border-radius:5px;">
+    </div>
+    <div style="display: flex; align-items: center;">
+      <i class="fas fa-location-dot" style="color: red; margin-right: 5px;"></i>
+      <div id="addressText" style="color: aliceblue; font-size: xx-small; padding-right: 20px;"></div>
+    </div>
+  </header>
+
+  <a href="products.html">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search home appliances..." />
+    </div>
+  </a>
+
+  <section class="hero">
+    <h1>Buy ₹1000 ,<strong>Get Coupon ₹100</strong></h1>
+    <p>Your destination for quality home appliances & offers!</p>
+    <a href="products.html" class="btn">Shop Now</a>
+  </section>
+
+  <section class="homeappliance-product">
+    <h2>Home Appliance Collection</h2>
+    <div class="product-grid" id="homeappliance-list">
+      <!-- Home Appliance products will load here -->
+    </div>
+  </section>
+
+  <section class="featured-products">
+    <h2>Featured Products</h2>
+    <div class="product-grid" id="product-list"></div>
+  </section>
+
+  <footer>
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <i class="fas fa-home" style="color: green;"></i>
+        <span>Home</span>
+      </a>
+      <a href="products.html" class="nav-item">
+        <i class="fas fa-box-open"></i>
+        <span>Products</span>
+      </a>
+      <a href="cart.html" class="nav-item">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+      </a>
+      <a href="orders.html" class="nav-item">
+        <i class="fas fa-receipt"></i>
+        <span>Orders</span>
+      </a>
+      <a href="login.html" class="nav-item" id="userLinks">
+        <span id="userLinks">Login</span>
+      </a>
+    </nav>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    const homeApplianceList = document.getElementById("homeappliance-list");
+
+    fetch("http://localhost:5000/api/homeappliance")
+      .then(res => res.json())
+      .then(products => {
+        if (!products.length) {
+          homeApplianceList.innerHTML = "<p>No home appliance products found.</p>";
+          return;
+        }
+
+        homeApplianceList.innerHTML = "";
+        products.forEach(product => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+
+          // Clean Image URL Logic
+          let imageUrl = "default-placeholder.png";
+
+          if (product.moreImages && product.moreImages.length > 0) {
+            imageUrl = product.moreImages[0].url || product.moreImages[0];
+          } else if (product.image) {
+            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+          }
+
+          const original = product.originalprice || product.originalPrice;
+          const discount = calculateDiscount(product.price, original);
+
+          card.innerHTML = `
+            <div class="div11" style="position: relative;">
+              <a href="product.html?id=${product._id}" style="position: relative; display: block;">
+                <img src="${imageUrl}" alt="${product.title}" style="width: 100%; border-radius: 5px;" />
+
+                <!-- ❤️ Wishlist Icon -->
+                <i class="fas fa-heart wishlist-icon" onclick="toggleWishlist('${product._id}')" style="
+                  top: 10px;
+                  right: 10px;
+                  color: white;
+                  background-color: rgba(0,0,0,0.5);
+                  padding: 5px;
+                  border-radius: 50%;
+                  font-size: 16px;
+                "></i>
+              </a>
+              <h3 style="color:grey">${product.name}</h3>
+              <b>★★★★☆</b>
+              <p>
+                ${discount > 0 ? `<span style="color:red; font-size: 12px; background-color:yellow; padding: 0 5px; border-radius:3px;">${discount}% OFF</span>` : ''}
+                ${original ? `<span style="color:gray; font-size:12px; text-decoration:line-through;">₹${original}</span>` : ''}
+                ₹${product.price} 
+              </p>
+              <h4>${product.option}</h4>
+              <button onclick="window.location.href='product.html?id=${product._id}'">View Product</button>
+            </div>
+          `;
+          homeApplianceList.appendChild(card);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading home appliance products:", err);
+        homeApplianceList.innerHTML = "<p>Error loading home appliance products.</p>";
+      });
+
+    function calculateDiscount(price, original) {
+      if (!original || original <= price) return 0;
+      return Math.round(((original - price) / original) * 100);
+    }
+
+    function addToCart(id, image, name, price) {
+      alert("Added to cart: " + name);
+    }
+  </script>
+
+  <script>
+    const userLinks = document.getElementById("userLinks");
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      userLinks.innerHTML = `
+        <a href="profile.html"><i class="fas fa-user"></i><br>Profile</a>
+      `;
+    } else {
+      userLinks.innerHTML = `
+        <a href="login.html"><i class="fas fa-user"></i><br>Login</a>
+      `;
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      alert("Logged out");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucky Draw - Wahu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ======== Global Reset ======== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  color: #fff;
+  line-height: 1.6;
+  background: url("https://as2.ftcdn.net/v2/jpg/15/59/66/57/1000_F_1559665715_L1I4MwXGrO5feQDjSDjKcendJApWkEyN.jpg") no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
+}
+
+/* Subtle Snow Overlay */
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: -1;
+}
+
+/* ======== Header ======== */
+header {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 15px 30px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 0 10px #ffcc00, 0 0 20px #ff6600;
+}
+
+/* ======== Section Styling ======== */
+section {
+  margin: 40px 20px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.wahu-list h1,
+.homeappliance-product h4 {
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 0 8px #ffcc00, 0 0 18px #ff6600;
+}
+
+.wahu-list h1 {
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+}
+
+.wahu-list h3, 
+.homeappliance-product h4, 
+h3 {
+  font-size: 1.1rem;
+  color: #f5f5f5;
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.8;
+}
+
+/* ======== Product Grid ======== */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 25px;
+  margin-top: 25px;
+}
+
+.product-card {
+  width: 170px;
+  
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 3px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+}
+
+.product-card img {
+  width: 100%;
+  height: 200px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.product-card h3 {
+  margin-top: 10px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.product-card button {
+  margin-top: 10px;
+  background: linear-gradient(90deg, #ff3b3b, #ffb347);
+  border: none;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.product-card button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #ffb347, #ff3b3b);
+}
+
+/* ======== Special Headings (Glow + Gradient) ======== */
+h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  background: linear-gradient(90deg, #ffcc00, #ff6600, #ff3366);
+ 
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  margin-bottom: 15px;
+}
+
+/* ======== Footer ======== */
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+
+/* Footer Navigation Bar */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #111;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+  z-index: 1000;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+}
+
+.nav-item {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: color 0.3s ease;
+  flex: 1;
+}
+
+.nav-item i {
+  font-size: 18px;
+  margin-bottom: 4px;
+  
+}
+.nav-item:hover {
+  color: #fbc02d;
+  transform: scale(1.1);
+}
+.nav-item:hover i {
+  transform: rotate(10deg);
+}
+@media screen and (max-width: 600px) {
+  .form-page {
+    padding: 20px;
+  }
+  .nav-item span {
+    font-size: 12px;
+  }
+  .nav-item i {
+    font-size: 16px;
+  }
+}
+/* ======== Snow Animation ======== */
+@keyframes snow {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+.snowflake {
+  position: fixed;
+  top: 0;
+  color: white;
+  font-size: 1.2em;
+  animation: snow 10s linear infinite;
+  opacity: 0.8;
+  z-index: 9999;
+}
+
+.snowflake:nth-child(odd) { animation-duration: 12s; }
+.snowflake:nth-child(even) { animation-duration: 8s; }
+
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Winter Lucky Draw</h1>
+  </header>
+
+
+  <section class="wahu-list">
+    <h1 style="margin-top: 60px;">🎄 Wahu Store Christmas & New Year Lucky Draw! 🎉</h1>
+    <h4>This festive season, WZD Store brings you a special Lucky Draw Offer for all our valued customers!
+      By ordering our Special Lucky Product, you automatically get a chance to win exciting gifts delivered right to
+      your doorstep! 🏆🎁</h4>
+      <br>
+
+
+    <h3 style="font-size: small; ">🏆 Prize Delivery<br>
+      Winners will receive their prizes delivered directly to their registered delivery address.
+      Each winner will also get a special shopping banner and recognition on our website.</h3>
+
+    <h4 style="color: aqua;">✨ Event Details<br>
+      🎅 Christmas Lucky Draw <br>
+
+      Last date to get your Lucky Draw ticket: 20th December<br>
+
+      Winners list display date: 25 December onwards (Only visible to customers who placed an order before 20th
+      December)
+      <br>
+
+      How to participate: Order the special lucky product before 20th December.</h4>
+    
+
+    <div class="product-grid" id="wahu-list">
+
+      <p>Loading Lucky Draw products...</p>
+    </div>
+  </section>
+
+
+
+
+
+
+
+  <h4 style="color: white; padding: 20px;">🛍️ Order Now & Try Your Luck!<br>
+
+    Start this festive season with a smile — your next order might make you a winner!
+    🎄✨ Shop, Win & Celebrate with Wahu Store! ✨🎆</h4>
+
+
+ <h3 style="color: #ff3b3b; font-size: small;">📢 Important Note
+
+    Once you place your order:
+
+    You cannot cancel or return the Lucky Draw entry.
+
+    Winning and losing are part of the game — enjoy the spirit of the festival!
+
+    Make sure your contact and address details are correct for smooth prize delivery.</h3>
+
+
+
+
+<section class="homeappliance-product">
+    
+  <h4>🎆 New Year Lucky Draw <br>
+
+    Last date to get your Lucky Draw ticket: 25th December<br>
+
+    Winners list display date: 1th January 2026 onwards (Only visible to customers who ordered before 25th December)</h4>
+    <div class="product-grid" id="homeappliance-list">
+      <!-- Home Appliance products will load here -->
+    </div>
+  </section>
+
+
+
+
+
+   
+
+
+
+
+
+
+<div style="padding: 20px;">
+
+  <h3>🎫 How to Get Lucky Draw Tickets<br>
+
+    Each ticket is linked to your product quantity:
+
+    1 product = 1 ticket
+
+    2 products = 2 tickets
+
+    3 products = 3 tickets
+
+    4 products = 4 tickets
+    …and so on!
+
+    So, the more you order, the more tickets you earn — and the higher your chances of winning amazing prizes!</h3>
+
+  <h3>💳 Payment & Order Rules<br>
+
+    You can pay using Cash on Delivery (COD) or Online Payment (as per your convenience).
+
+    Once your order is confirmed, your Lucky Draw ticket will be automatically generated.
+
+    Please note: Tickets cannot be canceled or returned once issued. If you return your product, your Lucky Draw entry
+    will also be canceled.
+
+    Participation is valid only for genuine orders — only those truly interested should order.</h3>
+
+
+  <h3>🔐 How to Check Your Ticket & Order<br>
+
+    To log in and view your Lucky Draw entry:
+
+    Visit our website’s Lucky Draw section.
+
+    Enter your registered phone number (used while ordering).
+
+    Instantly view your order details and ticket number.
+
+    Your tickets and results will be shown once the draw list is live on the respective dates.</h3>
+
+</div>
+
+  <footer>
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <i class="fas fa-home" style="color: green;"></i>
+        <span>Home</span>
+      </a>
+      <a href="products.html" class="nav-item">
+        <i class="fas fa-box-open"></i>
+        <span>Products</span>
+      </a>
+      <a href="cart.html" class="nav-item">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+      </a>
+
+      <a href="orders.html" class="nav-item">
+        <i class="fas fa-receipt"></i>
+        <span>Orders</span>
+      </a>
+
+      <a href="login.html" class="nav-item" id="userLinks">
+        <span id="userLinks">Login </span>
+      </a>
+    </nav>
+  </footer>
+
+  <!-- ========== Wahu Fetch Script ========== -->
+  <script>
+    const wahu = document.getElementById("wahu-list");
+
+    fetch("http://localhost:5000/api/wahu")
+      .then(res => res.json())
+      .then(products => {
+        if (!products.length) {
+          wahu.innerHTML = "<p>No wahu products found.</p>";
+          return;
+        }
+
+        wahu.innerHTML = "";
+        products.forEach(product => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+
+          // Image URL logic (Cloudinary or local)
+          let imageUrl = "default-placeholder.png";
+          if (product.moreImages && product.moreImages.length > 0) {
+            imageUrl = product.moreImages[0].url || product.moreImages[0];
+          } else if (product.image) {
+            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+          }
+
+          card.innerHTML = `
+            <div class="div11" style="position: relative;">
+              <a href="product.html?id=${product._id}" style="position: relative; display: block;">
+                <img src="${imageUrl}" alt="${product.title}" />
+                <h3>${product.name}</h3>
+              </a>
+            </div>
+          `;
+          wahu.appendChild(card);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading wahu products:", err);
+        wahu.innerHTML = "<p>Error loading wahu products.</p>";
+      });
+  </script>
+
+  <!-- ========== User Login/Profile Script ========== -->
+  <script>
+    const userLinks = document.getElementById("userLinks");
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      userLinks.innerHTML = `
+        <a href="profile.html">
+          <i class="fas fa-user"></i><br>
+          <h5>Profile</h5>
+        </a>
+      `;
+    } else {
+      userLinks.innerHTML = `
+        <a href="login.html">
+          <i class="fas fa-user"></i><br>
+          <h5>Login</h5>
+        </a>
+      `;
+    }
+
+    window.logout = function () {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      alert("Logged out");
+      window.location.href = "index.html";
+    };
+  </script>
+  <script src="script.js"></script>
+  <script>
+    const homeApplianceList = document.getElementById("homeappliance-list");
+
+    fetch("http://localhost:5000/api/homeappliance")
+      .then(res => res.json())
+      .then(products => {
+        if (!products.length) {
+          homeApplianceList.innerHTML = "<p>No home appliance products found.</p>";
+          return;
+        }
+
+        homeApplianceList.innerHTML = "";
+        products.forEach(product => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+
+          // Clean Image URL Logic
+          let imageUrl = "default-placeholder.png";
+
+          if (product.moreImages && product.moreImages.length > 0) {
+            imageUrl = product.moreImages[0].url || product.moreImages[0];
+          } else if (product.image) {
+            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+          }
+
+          const original = product.originalprice || product.originalPrice;
+          const discount = calculateDiscount(product.price, original);
+
+          card.innerHTML = `
+            <div class="div11" style="position: relative;">
+              <a href="product.html?id=${product._id}" style="position: relative; display: block;">
+                <img src="${imageUrl}" alt="${product.title}" style="width: 100%; border-radius: 5px;" />
+
+               
+              </a>
+              <h3 style="color:#fff;">${product.name}</h3>
+              
+            </div>
+          `;
+          homeApplianceList.appendChild(card);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading home appliance products:", err);
+        homeApplianceList.innerHTML = "<p>Error loading home appliance products.</p>";
+      });
+
+    function calculateDiscount(price, original) {
+      if (!original || original <= price) return 0;
+      return Math.round(((original - price) / original) * 100);
+    }
+
+    function addToCart(id, image, name, price) {
+      alert("Added to cart: " + name);
+    }
+  </script>
+  <script>
+  for (let i = 0; i < 30; i++) {
+    const snowflake = document.createElement("div");
+    snowflake.classList.add("snowflake");
+    snowflake.textContent = "❄";
+    snowflake.style.left = Math.random() * 100 + "vw";
+    snowflake.style.animationDelay = Math.random() * 10 + "s";
+    snowflake.style.fontSize = Math.random() * 20 + 10 + "px";
+    document.body.appendChild(snowflake);
+  }
+</script>
+
+
+
+</body>
+
+</html>

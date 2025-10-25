@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WahuShop - Your Cart</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="cart.css" />
+</head>
+
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg"
+        style="width: 100px; padding-top: 7px; border-radius:5px; padding-left: 20px;">
+    </div>
+    <div style="display: flex; align-items: center;">
+      <i class="fas fa-location-dot" style="color: red; margin-right: 5px;"></i>
+      <div id="addressText" style="color: rgb(255, 255, 255); font-size: xx-small; padding-right: 20px;"></div>
+    </div>
+  </header>
+
+  <!-- Promo Banner -->
+  <section class="hero">
+    <h1>Buy ₹1000, <strong>Get Coupon ₹100</strong></h1>
+    <p>Your destination for the best Fashion Dresses and Coupons!</p>
+    <a href="products.html" class="btn">Shop Now</a>
+  </section>
+
+  <!-- Cart Items -->
+  <main class="featured-products">
+    <h2>Your Shopping Cart</h2>
+    <div id="cart-items" class="product-grid"></div>
+
+    <!-- Coupons -->
+    <div class="div1">
+      <div style="margin-top: 20px; text-align: left; padding-left: 10px; padding-top: 14px; padding-bottom: 20px;">
+        <h4>Select a Coupon:</h4>
+        <label><input type="radio" name="coupon" value="0" checked> Not Available</label><br>
+        <label><input type="radio" name="coupon" value="100" data-min="1000"> ₹100 Off on ₹1000+</label><br>
+        <label><input type="radio" name="coupon" value="300" data-min="2000"> ₹300 Off on ₹2000+</label>
+      </div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="div2">
+      <div id="cart-summary" style="text-align:center; margin-top: 30px; padding: 20px;">
+        <h3 style="color: grey;" id="total-price">Total: ₹0</h3>
+        <button id="checkoutBtn"
+          style="font-weight: bold; background: chocolate; border-radius: 5px; color: aliceblue; width: 100%; height: 48px; font-size: 20px;">Proceed
+          to Checkout</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Continue Shopping Button -->
+  <div class="div4">
+    <a href="index.html">
+      <button
+        style="width: 100%; height: 48px; font-size: 18px; color: blue; border-radius: 28px; background-color: rgba(0, 255, 255, 0.164); margin-top: 15px;">Continue
+        Shopping</button>
+    </a>
+  </div>
+
+  <!-- Footer Navigation -->
+  <footer>
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i><span>Products</span></a>
+      <a href="cart.html" class="nav-item"><i class="fas fa-shopping-cart" style="color: green;"></i><span>Cart</span></a>
+      <a href="orders.html" class="nav-item"><i class="fas fa-receipt"></i><span>Orders</span></a>
+      <a href="login.html" class="nav-item" id="userLinks">
+        <span id="userLinks">Login</span>
+      </a>
+    </nav>
+  </footer>
+
+  <!-- Cart Script -->
+  <script>
+    const addressTextEl = document.getElementById("addressText");
+    const token = localStorage.getItem("token");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const cartContainer = document.getElementById("cart-items");
+      const totalPriceEl = document.getElementById("total-price");
+      const checkoutBtn = document.getElementById("checkoutBtn");
+      let cart = [];
+
+      // Cloudinary-only image handler
+      function getImageUrl(image) {
+        if (!image) return "default-placeholder.png";
+        if (typeof image === "object" && image.url) return image.url;
+        if (typeof image === "string" && image.startsWith("http")) return image;
+        return "default-placeholder.png";
+      }
+
+      // Fetch cart
+      if (token) {
+        fetch("http://localhost:5000/api/cart", {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            cart = data.items || [];
+            renderCart();
+          })
+          .catch(() => alert("Failed to fetch cart. Please try again."));
+      } else {
+        cart = JSON.parse(localStorage.getItem("cart")) || [];
+        renderCart();
+      }
+
+      function renderCart() {
+        cartContainer.innerHTML = "";
+        let total = 0;
+
+        if (cart.length === 0) {
+          cartContainer.innerHTML = "<p>Your cart is empty.</p>";
+          checkoutBtn.style.display = "none";
+          totalPriceEl.textContent = "Total: ₹0";
+          return;
+        }
+
+        cart.forEach((item, index) => {
+          const price = item.price || 0;
+          const qty = item.qty || 1;
+          total += price * qty;
+
+          const card = document.createElement("div");
+          card.className = "product-card";
+          card.innerHTML = `
+            <a href="product.html?id=${item.id}">
+              <img src="${getImageUrl(item.image)}" alt="${item.name}" />
+              <div class="product-details">
+                <a href="product.html?id=${item.id}"><h3 style="color:darkblue">${item.name}</h3></a>
+                <p>Size: <strong>${item.size}</strong></p>
+                <div class="quantity-control">
+                  <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                  <span class="qty-display">${qty}</span>
+                  <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                </div>
+              </div>
+              <div class="product-price">
+                <p>Price: <strong style="color:black">₹${price}</strong></p>
+                <p>Subtotal: <strong style="color:green">₹${price * qty}</strong></p>
+                <button onclick="removeItem(${index})" class="remove-btn">Remove</button>
+              </div>
+            </a>
+          `;
+          cartContainer.appendChild(card);
+        });
+
+        let discount = 0;
+        const selectedCoupon = document.querySelector('input[name="coupon"]:checked');
+        if (selectedCoupon) {
+          const minAmount = parseInt(selectedCoupon.getAttribute("data-min")) || 0;
+          const discountValue = parseInt(selectedCoupon.value);
+          if (total >= minAmount) discount = discountValue;
+        }
+
+        const finalAmount = total - discount;
+        const discountInfo = discount > 0 ? `<span style="color: green; font-size:15px">Coupon Applied: -₹${discount}</span><br/>` : "";
+        totalPriceEl.innerHTML = `Total: ₹${total} <br/> ${discountInfo} <strong style="color:green;">Payable: ₹${finalAmount}</strong>`;
+        checkoutBtn.style.display = "inline-block";
+        checkoutBtn.disabled = false;
+      }
+
+      window.updateQty = function (index, change) {
+        const currentQty = cart[index].qty || 1;
+        const updatedQty = currentQty + change;
+        if (updatedQty <= 0) {
+          removeItem(index);
+          return;
+        }
+
+        cart[index].qty = updatedQty;
+
+        if (token) {
+          fetch("http://localhost:5000/api/cart", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              items: [{
+                id: cart[index].id,
+                size: cart[index].size,
+                qty: cart[index].qty
+              }]
+            })
+          })
+            .then(res => res.json())
+            .then(() => renderCart())
+            .catch(() => alert("Failed to update cart"));
+        } else {
+          localStorage.setItem("cart", JSON.stringify(cart));
+          renderCart();
+        }
+      };
+
+      window.removeItem = function (index) {
+        const itemToRemove = cart[index];
+        cart.splice(index, 1);
+
+        if (token) {
+          fetch("http://localhost:5000/api/cart", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ id: itemToRemove.id, size: itemToRemove.size })
+          })
+            .then(() => renderCart())
+            .catch(() => alert("Failed to remove item"));
+        } else {
+          localStorage.setItem("cart", JSON.stringify(cart));
+          renderCart();
+        }
+      };
+
+      checkoutBtn.addEventListener("click", () => {
+        const selectedCoupon = document.querySelector('input[name="coupon"]:checked');
+        let discount = 0;
+        let minAmount = 0;
+
+        if (selectedCoupon) {
+          discount = parseInt(selectedCoupon.value) || 0;
+          minAmount = parseInt(selectedCoupon.getAttribute("data-min")) || 0;
+        }
+
+        const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const finalAmount = cartTotal >= minAmount ? cartTotal - discount : cartTotal;
+
+        sessionStorage.setItem("checkoutData", JSON.stringify({
+          cart,
+          discount,
+          total: cartTotal,
+          finalAmount
+        }));
+
+        if (!token) {
+          alert("Please log in to place your order.");
+          window.location.href = "login.html";
+        } else {
+          window.location.href = "checkout.html";
+        }
+      });
+
+      document.querySelectorAll('input[name="coupon"]').forEach(radio => {
+        radio.addEventListener("change", renderCart);
+      });
+
+      renderCart();
+    });
+  </script>
+
+  <!-- User Profile/Login Handling -->
+  <script>
+    const userLinks = document.getElementById("userLinks");
+
+    if (token) {
+      userLinks.innerHTML = `
+        <a href="profile.html" style="color: white; font-size: 12px; text-align: center;">
+          <i class="fas fa-user"></i><br>Profile
+        </a>
+      `;
+    } else {
+      userLinks.innerHTML = `
+        <a href="login.html" style="color: white; font-size: 12px; text-align: center;">
+          <i class="fas fa-user"></i><br>Login
+        </a>
+      `;
+    }
+
+    function changeAddress() {
+      const addressTextEl = document.getElementById("addressText");
+      if (!addressTextEl) return;
+
+      const user = JSON.parse(localStorage.getItem("user") || null);
+
+      if (!user) {
+        addressTextEl.innerHTML = `<button onclick="window.location.href='profile.html'" style="width: 120px; color: green;">Add Address</button>`;
+        return;
+      }
+
+      const a = user.address || {};
+      if (!a.name || !a.city || !a.pincode || !a.phone) {
+        addressTextEl.innerHTML = `<button onclick="window.location.href='profile.html'" style="width: 120px; color: green;">Add Address</button>`;
+        return;
+      }
+
+      addressTextEl.innerHTML = `
+        <a href="address.html" style="color: white; display: block; text-align: center;">
+          ${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}<br/>
+          ${a.city}, ${a.state || ""} - ${a.pincode}<br/>
+        </a>
+      `;
+    }
+
+    window.addEventListener('DOMContentLoaded', changeAddress);
+  </script>
+</body>
+
+</html>

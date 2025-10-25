@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <title>Add Address - MiniShop</title>
+  <link rel="stylesheet" href="profile.css" />
+</head>
+<body>
+
+  <header>
+    <div class="logo"><img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg" style="width: 100px; padding-top: 10px; border-radius:5px; padding-left: 20px;"></div>
+ 
+  </header>
+
+  <div class="content">
+    <main class="form-page">
+      <h2>Update Address</h2>
+      <form id="addressForm">
+        <h6 style="text-align:left ; padding-left: 10px;">Full Name</h6>
+        <input type="text" id="name" placeholder="Full Name" required /><br>
+        
+        <h6 style="text-align:left ; padding-left: 10px;">Phone Number</h6>
+        <input type="text" id="phone" placeholder="Phone Number" required /><br>
+
+      <h6 style="text-align:left ; padding-left: 10px;">Street/Building name</h6>
+        <input type="text" id="street" placeholder="Street" required /><br>
+
+        <h6 style="text-align:left ; padding-left: 10px;">Road/Landmark</h6>
+        <input type="text" id="road" placeholder="Road" required /><br>
+
+        <h6 style="text-align:left ; padding-left: 10px;">Place</h6>
+        <input type="text" id="place" placeholder="Place" required /><br>
+
+        <h6 style="text-align:left ; padding-left: 10px;">Pincode</h6>
+        <input type="text" id="pincode" placeholder="Pincode" required /><br>
+
+        <h6 style="text-align:left ; padding-left: 10px;">State</h6>
+        <input type="text" id="state" placeholder="State" required /><br>
+
+        <h6 style="text-align:left ; padding-left: 10px;">City/Town</h6>
+        <input type="text" id="city" placeholder="City" required /><br><br>
+        
+        <button type="submit">Save Address</button>
+      </form>
+      <p id="saveMessage" style="color: green;"></p>
+    </main>
+  </div>
+
+  <footer>
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="products.html" class="nav-item">
+        <i class="fas fa-box-open"></i>
+        <span>Products</span>
+      </a>
+      <a href="cart.html" class="nav-item">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+      </a>
+
+      <a href="orders.html" class="nav-item">
+        <i class="fas fa-receipt"></i>
+        <span>Orders</span>
+      </a>
+      <a href="profile.html" class="nav-item">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+
+      
+    </nav>
+  </footer>
+  <script>
+  const user = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
+
+  if (!token || !user) {
+    alert("Please login to continue.");
+    window.location.href = "login.html";
+  }
+
+  const addressForm = document.getElementById("addressForm");
+  const saveMessage = document.getElementById("saveMessage");
+
+  // Load existing address into form
+  document.addEventListener("DOMContentLoaded", () => {
+    const address = user?.address || {};
+    document.getElementById("name").value = address.name || "";
+    document.getElementById("phone").value = address.phone || "";
+    document.getElementById("street").value = address.street || "";
+    document.getElementById("road").value = address.road || "";
+    document.getElementById("place").value = address.place || "";
+    document.getElementById("pincode").value = address.pincode || "";
+    document.getElementById("state").value = address.state || "";
+    document.getElementById("city").value = address.city || "";
+  });
+
+  // Save address
+  addressForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const address = {
+      name: document.getElementById("name").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      street: document.getElementById("street").value.trim(),
+      road: document.getElementById("road").value.trim(),
+      place: document.getElementById("place").value.trim(),
+      pincode: document.getElementById("pincode").value.trim(),
+      state: document.getElementById("state").value.trim(),
+      city: document.getElementById("city").value.trim()
+    };
+
+    try {
+      const res = await fetch("http://localhost:5000/api/users/address", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ address })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        saveMessage.textContent = "Address saved successfully!";
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // ✅ Auto redirect after 1.5 seconds
+        setTimeout(() => {
+          // If user came from checkout page, go back there
+          if (document.referrer.includes("checkout.html")) {
+            window.location.href = "checkout.html";
+          } else {
+            window.history.back();
+          }
+        }, 1500);
+      } else {
+        alert(data.message || "Failed to save address.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error.");
+    }
+  });
+</script>
+
+
+  
+
+  
+</body>
+</html>

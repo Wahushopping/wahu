@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>MiniShop - Home</title>
+  <link rel="stylesheet" href="cata.css" />
+</head>
+
+<body>
+  <header>
+    <div class="logo"><img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg"
+        style="width: 100px; padding-top: 10px; border-radius:5px;">
+    </div>
+    <div style="display: flex; align-items: center;">
+      <i class="fas fa-location-dot" style="color: red; margin-right: 5px;"></i>
+      <div id="addressText" style="color: aliceblue; font-size: xx-small; padding-right: 20px;">
+      </div>
+    </div>
+  </header>
+  <section class="trending-products" style ="background-color: rgb(191, 250, 250); padding-bottom: 60px;">
+    <h2 style="margin-top: 30px; padding-top: 40px;">Trending Products </h2>
+    <div class="product-grid" id="trending-list"
+     >
+      <!-- Trending products will load here -->
+    </div>
+  </section>
+
+
+  <section class="featured-products">
+    <h2>Featured Products</h2>
+    <div class="product-grid" id="product-list">
+      <!-- Products will be loaded here via JavaScript -->
+    </div>
+  </section>
+  <!-- Add this in your HTML file -->
+  <footer>
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <i class="fas fa-home" style="color: green;"></i>
+        <span>Home</span>
+      </a>
+      <a href="products.html" class="nav-item">
+        <i class="fas fa-box-open"></i>
+        <span>Products</span>
+      </a>
+      <a href="cart.html" class="nav-item">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+      </a>
+
+      <a href="orders.html" class="nav-item">
+        <i class="fas fa-receipt"></i>
+        <span>Orders</span>
+      </a>
+
+      <a href="login.html" class="nav-item" id="userLinks">
+        <span id="userLinks">Login </span>
+      </a>
+    </nav>
+  </footer>
+
+
+  <script>
+    const trendingList = document.getElementById("trending-list");
+
+    fetch("http://localhost:5000/api/trending")
+      .then(res => res.json())
+      .then(products => {
+        if (!products.length) {
+          trendingList.innerHTML = "<p>No trending products found.</p>";
+          return;
+        }
+
+        trendingList.innerHTML = "";
+        products.forEach(product => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+          const original = product.originalprice || product.originalPrice;
+          const discount = calculateDiscount(product.price, original);
+
+
+          // Image URL logic (Cloudinary or local)
+          let imageUrl = "default-placeholder.png";
+          if (product.moreImages && product.moreImages.length > 0) {
+            imageUrl = product.moreImages[0].url || product.moreImages[0];
+          } else if (product.image) {
+            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+          }
+
+card.innerHTML = `
+  <div class="div11" style="position: relative; width: 100%; height: 200px; text-align: center; margin-bottom:50px">
+    <a href="product.html?id=${product._id}" style="text-decoration: none; color: inherit; ">
+      <img 
+        src="${imageUrl}" 
+        alt="${product.title}" 
+        style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; " 
+      />
+      <h3 style="margin-top: 8px; font-size: 16px; font-weight: bold; color: purple">
+        ${product.option}
+
+      </h3>
+    </a>
+  </div>
+`;
+
+          trendingList.appendChild(card);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading trending products:", err);
+        trendingList.innerHTML = "<p>Error loading trending products.</p>";
+      });
+  </script>
+
+
+
+
+
+
+
+
+
+  <script src="script.js"></script>
+
+
+
+
+
+
+
+  <script>
+    const userLinks = document.getElementById("userLinks");
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      userLinks.innerHTML = `
+    
+    <a href="profile.html"><i class="fas fa-user"></i><br><h5>Profile<h5></a>
+    
+  `;
+    } else {
+      userLinks.innerHTML = `
+    
+    <a href="login.html"><i class="fas fa-user"></i><br><h5>Login</h5></a>
+    
+     `;
+    }
+
+    window.logout = function () {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      alert("Logged out");
+      window.location.href = "index.html";
+    };
+
+  </script>
+</body>
+
+</html>

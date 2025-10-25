@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>Product Details - WahuShop</title>
+  <link rel="stylesheet" href="product.css" />
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg"
+        style="width: 100px; padding-top: 10px; border-radius:5px;">
+    </div>
+    <div style="display: flex; align-items: center;">
+      <i class="fas fa-location-dot" style="color: red; margin-right: 5px;"></i>
+      <div id="addressText" style="color: aliceblue; font-size: xx-small; padding-right: 20px; text-align: center;"></div>
+    </div>
+  </header>
+
+  <div class="content">
+    <main class="product-details">
+      <!-- Product Images -->
+      <div class="product-images-container">
+        <div class="thumbnail-images" id="thumbnailContainer"></div>
+        <div class="main-image">
+          <img id="mainProductImage" src="" alt="Main Product Image">
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="product-info">
+        <h3 id="product-name" style="color: black;">Loading...</h3>
+        <b>★★★★☆</b>
+        <p id="product-price"></p>
+
+
+      <div style="width: 120px;">
+     <h4 
+  id="product-Option" 
+  style="
+    background-color: green; 
+    color: aliceblue; 
+    font-weight: bold; 
+    padding: 4px 12px; 
+    border-radius: 4px; 
+    text-align: center; 
+    font-size: 13px; 
+    margin: 5px 0;
+  "
+>
+  Product Option
+</h4></div>  
+<br>
+
+        <h5>Select Sizes:</h5>
+        <div id="product-sizes"></div>
+        <p id="delivery-date" style="font-weight:500; color:#2c3e50; margin-top:10px;"></p>
+        <button id="addToCartBtn">Add to Cart</button>
+        <button id="addToWishlistBtn" class="wishlist-button" style="background-color: rgba(0, 0, 0, 0.747);">
+          <i class="fas fa-heart"></i> Add to Wishlist
+        </button>
+        <button id="shareBtn" class="share-button" style="background-color: rgba(63, 63, 63, 0.623);">
+          <i class="fas fa-share-alt"></i> Share
+        </button>
+
+        <h3>Product Details</h3>
+        <h6 id="product-description" class="description"></h6>
+        <button id="toggleDescriptionBtn" style="display:none;">Read More</button>
+        
+     
+        
+        <div id="product-video"></div>
+      </div>
+
+      <!-- Related Products Section -->
+      <h3 style="margin-top: 30px;">Related Products</h3>
+      <div id="related-products" class="related-products"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 10px;">
+      </div>
+    </main>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <footer>
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i><span>Products</span></a>
+      <a href="cart.html" class="nav-item"><i class="fas fa-shopping-cart"></i><span>Cart</span></a>
+      <a href="orders.html" class="nav-item"><i class="fas fa-receipt"></i><span>Orders</span></a>
+      <a href="login.html" class="nav-item" id="userLinks"><span id="userLinks">Login</span></a>
+    </nav>
+  </footer>
+
+  <!-- Product Logic -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+
+    const productName = document.getElementById('product-name');
+    const productOption = document.getElementById('product-Option');
+    const productPrice = document.getElementById('product-price');
+    const productDescription = document.getElementById('product-description');
+    const productSizes = document.getElementById('product-sizes');
+    const productVideoDiv = document.getElementById('product-video');
+    const mainImage = document.getElementById("mainProductImage");
+    const thumbnailContainer = document.getElementById("thumbnailContainer");
+    let selectedSize = null;
+    let currentProduct = null;
+    let currentImageIndex = 0;
+
+    // Handle Image URLs consistently
+    function getImageUrl(image) {
+      if (!image) return "default-placeholder.png";
+      if (typeof image === "string") return image;
+      if (image.url) return image.url;
+      return `http://localhost:5000/uploads/${image}`;
+    }
+
+    // Fetch product details
+    async function fetchProductDetails() {
+      try {
+        const res = await fetch(`http://localhost:5000/api/products/${productId}`);
+        const product = await res.json();
+        currentProduct = product;
+
+        // Display basic details
+        productName.textContent = product.name;
+        productOption.textContent = product.option;
+
+        const original = product.originalprice || product.originalPrice;
+        const discount = calculateDiscount(product.price, original);
+
+        productPrice.innerHTML = `
+          ${discount > 0 ? `<span style="color:green; font-weight:bold; font-size:15px">${discount}% OFF</span>` : ''}
+          ${original ? `<span style="color:gray; font-size:12px; margin-left:8px; text-decoration:line-through;">₹${original}</span>` : ''}
+          ₹${product.price}
+        `;
+
+        productDescription.innerHTML = product.description.replace(/\n/g, "<br>");
+        if (product.description && product.description.length > 100) {
+          const toggleBtn = document.getElementById('toggleDescriptionBtn');
+          toggleBtn.style.display = 'inline-block';
+          toggleBtn.addEventListener('click', () => {
+            productDescription.classList.toggle('show');
+            toggleBtn.textContent = productDescription.classList.contains('show') ? 'Show Less' : 'Read More';
+          });
+        }
+
+        // Display sizes
+        if (product.sizes?.length) {
+          product.sizes.forEach(size => {
+            const label = document.createElement('label');
+            label.classList.add('size-option');
+            label.textContent = size;
+            label.addEventListener('click', () => {
+              document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('active'));
+              label.classList.add('active');
+              selectedSize = size;
+            });
+            productSizes.appendChild(label);
+          });
+        }
+
+        // Display images
+        if (product.moreImages?.length) {
+          mainImage.src = getImageUrl(product.moreImages[0]);
+          product.moreImages.forEach((imgSrc, index) => {
+            const img = document.createElement("img");
+            img.src = getImageUrl(imgSrc);
+            if (index === 0) img.classList.add("active");
+            img.addEventListener("click", () => {
+              document.querySelectorAll(".thumbnail-images img").forEach(i => i.classList.remove("active"));
+              img.classList.add("active");
+              mainImage.src = img.src;
+              currentImageIndex = index;
+            });
+            thumbnailContainer.appendChild(img);
+          });
+        } else {
+          mainImage.src = getImageUrl(product.image);
+        }
+
+        // Display video
+        if (product.video) {
+          const videoElem = document.createElement('video');
+          videoElem.src = getImageUrl(product.video);
+          videoElem.controls = true;
+          videoElem.style.width = '100%';
+          productVideoDiv.appendChild(videoElem);
+        }
+
+        // Fetch related products
+        fetchRelatedProducts(currentProduct);
+
+const addToCartBtn = document.getElementById("addToCartBtn");
+
+addToCartBtn.addEventListener("click", () => {
+  if (!currentProduct) return;
+
+  addToCart(currentProduct);
+});
+
+async function addToCart(product) {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("⚠️ Please log in to add items to cart.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  if (!selectedSize) {
+    alert("⚠️ Please select a size.");
+    return;
+  }
+
+  const item = {
+    id: product._id,
+    name: product.name,
+    image: product.moreImages?.[currentImageIndex]?.url 
+       || product.image?.url 
+       || product.moreImages?.[currentImageIndex] 
+       || product.image,
+
+    size: selectedSize,
+    price: product.price,
+    qty: 1
+  };
+
+  try {
+    const res = await fetch("http://localhost:5000/api/cart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ items: [item] })
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      alert("✅ Item added to cart");
+    } else {
+      alert("❌ " + (result.message || "Failed to add to cart"));
+    }
+  } catch (err) {
+    console.error("Add to cart failed:", err);
+    alert("❌ Error adding to cart.");
+  }
+}
+
+const addToWishlistBtn = document.getElementById("addToWishlistBtn");
+
+addToWishlistBtn.addEventListener("click", () => {
+  if (!currentProduct) return;
+  toggleWishlist(currentProduct);
+});
+
+async function toggleWishlist(product) {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("⚠️ Please log in to use wishlist.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const wishlistItem = {
+    id: product._id,
+    name: product.name,
+    image: product.moreImages?.[currentImageIndex]?.url 
+       || product.image?.url 
+       || product.moreImages?.[currentImageIndex] 
+       || product.image,
+       
+    price: product.price
+  };
+
+  try {
+    const res = await fetch("http://localhost:5000/api/wishlist/toggle", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(wishlistItem)
+    });
+
+    const result = await res.json();
+    alert(res.ok ? result.message || "Added to wishlist" : result.message || "Error adding to wishlist");
+  } catch (err) {
+    console.error("Wishlist error:", err);
+    alert("❌ Error using wishlist.");
+  }
+}
+const shareBtn = document.getElementById("shareBtn");
+
+shareBtn.addEventListener("click", () => {
+  if (!currentProduct) return;
+
+  if (navigator.share) {
+    navigator.share({
+      title: currentProduct.name,
+      text: `Check out this product on WahuShop!`,
+      url: window.location.href
+    })
+    .then(() => console.log('✅ Product shared successfully'))
+    .catch(err => console.error('❌ Error sharing:', err));
+  } else {
+    alert("Sharing is not supported in your browser.");
+  }
+});
+
+
+
+
+
+
+      } catch (err) {
+        productName.textContent = "❌ Product not found.";
+        console.error("Failed to load product:", err);
+      }
+    }
+
+    // Related products logic
+    async function fetchRelatedProducts(currentProduct) {
+      try {
+        const res = await fetch("http://localhost:5000/api/products");
+        const allProducts = await res.json();
+        const related = allProducts
+          .filter(p => p._id !== currentProduct._id && p.option === currentProduct.option)
+          .slice(0, 20);
+        displayRelatedProducts(related);
+      } catch (err) {
+        console.error("Error fetching related products:", err);
+      }
+    }
+
+    function displayRelatedProducts(products) {
+      const container = document.getElementById("related-products");
+      container.innerHTML = products.length
+        ? products.map(product => `
+          <div style="border:1px solid #ddd; border-radius:5px; text-align:left; padding:5px;">
+            <a href="product.html?id=${product._id}" style="text-decoration:none; color:inherit;">
+              <img src="${getImageUrl(product.moreImages?.[0] || product.image)}" 
+                   style="width:100%; height:150px; object-fit:cover; border-radius:5px;">
+              <h4 style="font-size:12px; margin:5px 0; color:black;">${product.name}</h4>
+              <p style="color:#333; font-weight:bold;">₹${product.price}</p>
+              <h4>${product.option}</h4>
+              </a>
+            
+          </div>
+        `).join("")
+        : "<p>No related products found.</p>";
+    }
+
+    function calculateDiscount(sellPrice, originalPrice) {
+      if (!originalPrice || originalPrice <= 0) return 0;
+      return Math.round(((originalPrice - sellPrice) / originalPrice) * 100);
+    }
+
+    // Load product details on page load
+    fetchProductDetails();
+  </script>
+
+  <!-- User login/logout + address -->
+  <script>
+    const userLinks = document.getElementById("userLinks");
+    const token = localStorage.getItem("token");
+
+    userLinks.innerHTML = token
+      ? `<a href="profile.html"><i class="fas fa-user"></i><br>Profile</a>`
+      : `<a href="login.html"><i class="fas fa-user"></i><br>Login</a>`;
+
+    function changeAddress() {
+      const addressTextEl = document.getElementById("addressText");
+      if (!addressTextEl) return;
+      const user = JSON.parse(localStorage.getItem("user") || null);
+      if (!user || !user.address || !user.address.city) {
+        addressTextEl.innerHTML = `<button onclick="window.location.href='profile.html'" 
+          style="width:120px; color:green; height:35px;">Add Address</button>`;
+      } else {
+        const a = user.address;
+        addressTextEl.innerHTML = `
+          <a href='address.html'>
+            ${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}<br/>
+            ${a.city}, ${a.state || ""} - ${a.pincode}<br/>
+          </a>`;
+      }
+    }
+    window.addEventListener('DOMContentLoaded', changeAddress);
+  </script>
+ <script>
+  function showDeliveryDateRange() {
+    const deliveryEl = document.getElementById("delivery-date");
+    if (!deliveryEl) return;
+
+    const start = new Date();
+    const end = new Date();
+    start.setDate(start.getDate() + 10);
+    end.setDate(end.getDate() + 15);
+
+    const options = { day: "2-digit", month: "short" };
+    const range = `${start.toLocaleDateString("en-IN", options)} - ${end.toLocaleDateString("en-IN", options)}`;
+
+    deliveryEl.textContent = `Expected Delivery: ${range}`;
+  }
+
+  window.addEventListener("DOMContentLoaded", showDeliveryDateRange);
+</script>
+
+
+
+</body>
+</html>
