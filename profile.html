@@ -90,7 +90,7 @@
       }
 
      try {
-  const res = await fetch("http://localhost:5000/api/users/me", {
+  const res = await fetch("https://wahuserver.onrender.com/api/users/me", {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -187,7 +187,7 @@ async function loadWishlist() {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/wishlist", {
+    const res = await fetch("https://wahuserver.onrender.com/api/wishlist", {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -241,7 +241,7 @@ async function removeFromWishlist(productId) {
   }
 
   try {
-    const res = await fetch(`http://localhost:5000/api/wishlist/remove/${productId}`, {
+    const res = await fetch(`https://wahuserver.onrender.com/api/wishlist/remove/${productId}`, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` }
     });
@@ -270,7 +270,7 @@ function toggleWishlist(product) {
     return;
   }
 
-  fetch("http://localhost:5000/api/wishlist/toggle", {
+  fetch("https://wahuserver.onrender.com/api/wishlist/toggle", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -304,7 +304,7 @@ document.addEventListener("DOMContentLoaded", loadWishlist);
   <script>
     const trendingList = document.getElementById("trending-list");
 
-    fetch("http://localhost:5000/api/trending")
+    fetch("https://wahuserver.onrender.com/api/trending")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", loadWishlist);
           if (product.moreImages && product.moreImages.length > 0) {
             imageUrl = product.moreImages[0].url || product.moreImages[0];
           } else if (product.image) {
-            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+            imageUrl = product.image.url || `https://wahuserver.onrender.com/uploads/${product.image}`;
           }
 
           card.innerHTML = `
@@ -343,3 +343,4 @@ document.addEventListener("DOMContentLoaded", loadWishlist);
 </body>
 
 </html>
+
