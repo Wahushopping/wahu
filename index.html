@@ -299,7 +299,7 @@
   <script>
     const beautyList = document.getElementById("beauty-list");
 
-    fetch("http://localhost:5000/api/beauty")
+    fetch("https://wahuserver.onrender.com/api/beauty")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -319,7 +319,7 @@
           if (product.moreImages && product.moreImages.length > 0) {
             imageUrl = product.moreImages[0].url || product.moreImages[0];
           } else if (product.image) {
-            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+            imageUrl = product.image.url || `https://wahuserver.onrender.com/uploads/${product.image}`;
           }
 
 
@@ -362,7 +362,7 @@
   <script>
     const topwearList = document.getElementById("topwear-list");
 
-    fetch("http://localhost:5000/api/topwear")
+    fetch("https://wahuserver.onrender.com/api/topwear")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -383,7 +383,7 @@
           if (product.moreImages && product.moreImages.length > 0) {
             imageUrl = product.moreImages[0].url || product.moreImages[0];
           } else if (product.image) {
-            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+            imageUrl = product.image.url || `https://wahuserver.onrender.com/uploads/${product.image}`;
           }
 
           card.innerHTML = `
@@ -408,7 +408,7 @@
   <script>
     const shoesList = document.getElementById("shoes-list");
 
-    fetch("http://localhost:5000/api/shoes")
+    fetch("https://wahuserver.onrender.com/api/shoes")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -429,7 +429,7 @@
           if (product.moreImages && product.moreImages.length > 0) {
             imageUrl = product.moreImages[0].url || product.moreImages[0];
           } else if (product.image) {
-            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+            imageUrl = product.image.url || `https://wahuserver.onrender.com/uploads/${product.image}`;
           }
 
           card.innerHTML = `
@@ -469,7 +469,7 @@
   <script>
     const electronicsList = document.getElementById("electronics-list");
 
-    fetch("http://localhost:5000/api/electronics")
+    fetch("https://wahuserver.onrender.com/api/electronics")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -490,7 +490,7 @@
           if (product.moreImages && product.moreImages.length > 0) {
             imageUrl = product.moreImages[0].url || product.moreImages[0];
           } else if (product.image) {
-            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+            imageUrl = product.image.url || `https://wahuserver.onrender.com/uploads/${product.image}`;
           }
           card.innerHTML = `
                   <div class="div11" style="position: relative;">
@@ -530,7 +530,7 @@
   <script>
     const trendingList = document.getElementById("trending-list");
 
-    fetch("http://localhost:5000/api/trending")
+    fetch("https://wahuserver.onrender.com/api/trending")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -551,7 +551,7 @@
           if (product.moreImages && product.moreImages.length > 0) {
             imageUrl = product.moreImages[0].url || product.moreImages[0];
           } else if (product.image) {
-            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
+            imageUrl = product.image.url || `https://wahuserver.onrender.com/uploads/${product.image}`;
           }
 
           card.innerHTML = `
@@ -626,5 +626,6 @@
 
   </script>
 </body>
+
 
 </html>
