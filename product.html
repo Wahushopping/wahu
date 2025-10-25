@@ -117,13 +117,13 @@
       if (!image) return "default-placeholder.png";
       if (typeof image === "string") return image;
       if (image.url) return image.url;
-      return `http://localhost:5000/uploads/${image}`;
+      return `https://wahuserver.onrender.com/uploads/${image}`;
     }
 
     // Fetch product details
     async function fetchProductDetails() {
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${productId}`);
+        const res = await fetch(`https://wahuserver.onrender.com/api/products/${productId}`);
         const product = await res.json();
         currentProduct = product;
 
@@ -232,7 +232,7 @@ async function addToCart(product) {
   };
 
   try {
-    const res = await fetch("http://localhost:5000/api/cart", {
+    const res = await fetch("https://wahuserver.onrender.com/api/cart", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -282,7 +282,7 @@ async function toggleWishlist(product) {
   };
 
   try {
-    const res = await fetch("http://localhost:5000/api/wishlist/toggle", {
+    const res = await fetch("https://wahuserver.onrender.com/api/wishlist/toggle", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -330,7 +330,7 @@ shareBtn.addEventListener("click", () => {
     // Related products logic
     async function fetchRelatedProducts(currentProduct) {
       try {
-        const res = await fetch("http://localhost:5000/api/products");
+        const res = await fetch("https://wahuserver.onrender.com/api/products");
         const allProducts = await res.json();
         const related = allProducts
           .filter(p => p._id !== currentProduct._id && p.option === currentProduct.option)
@@ -418,3 +418,4 @@ shareBtn.addEventListener("click", () => {
 
 </body>
 </html>
+
