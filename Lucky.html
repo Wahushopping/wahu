@@ -389,7 +389,7 @@ footer {
   <script>
     const wahu = document.getElementById("wahu-list");
 
-    fetch("http://localhost:5000/api/wahu")
+    fetch("https://wahuserver.onrender.com/api/wahu")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -530,3 +530,4 @@ footer {
 
 
 </html>
+
