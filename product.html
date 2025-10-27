@@ -225,7 +225,7 @@ async function addToCart(product) {
        || product.image?.url 
        || product.moreImages?.[currentImageIndex] 
        || product.image,
-
+    title: product.title,
     size: selectedSize,
     price: product.price,
     qty: 1
@@ -418,4 +418,5 @@ shareBtn.addEventListener("click", () => {
 
 </body>
 </html>
+
 
