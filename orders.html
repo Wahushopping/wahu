@@ -140,27 +140,32 @@ fetch("https://wahuserver.onrender.com/api/orders/my", {
   if(!Array.isArray(orders) || orders.length===0){ orderList.innerHTML="<p>No orders yet.</p>"; return; }
 
   orderList.innerHTML = orders.map(order => `
-    <div style="border:1px solid #ddd; padding:10px; margin:10px 0;">
-      <p><strong>Placed on:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
-      <p><strong>Address:</strong> ${order.address?.road || ""}, ${order.address?.street || ""}, ${order.address?.city || ""}, ${order.address?.state || ""}, ${order.address?.pincode || ""}</p>
-      <p><strong>Phone:</strong> ${order.address?.phone || ""}</p>
-      <p><strong>Total:</strong> ₹${order.total}</h4></p>
-      
-      ${order.items.map((item,index)=>`
-        <div style="display:flex; gap:10px; border:2px solid #ccc; padding:5px; border-radius:5px; margin-top:5px;">
-          <div style="width:150px;">
-            <img src="${item.image}" style="width:90px;height:95px;object-fit:cover;">
-            <p style="margin:0;"><strong>${item.name}</strong></p>
-            <p style="margin:0;">Qty: ${item.qty}</p>
-            <p style="margin:0;">Price:<strong> ₹${item.price}</strong></p>
-          </div>
-          <div style="flex:1;">
-            <div class="status-tracker-wrapper">
+  <div style="border:1px solid #ddd; padding:10px; margin:10px 0;">
+    <p><strong>Placed on:</strong> ${new Date(order.createdAt).toLocaleString()}</p>
+    <p><strong>Address:</strong> ${order.address?.road || ""}, ${order.address?.street || ""}, ${order.address?.city || ""}, ${order.address?.state || ""}, ${order.address?.pincode || ""}</p>
+    <p><strong>Phone:</strong> ${order.address?.phone || ""}</p>
+    <p><strong>Total:</strong> ₹${order.total}</p>
 
-           <div class="status-tracker collapsed" id="statusTracker-${order._id}-${index}">
-  <div class="step ${order.status==='Cancelled' || ['Ordered','Packed','Shipped','Out for Delivery','Delivered'].includes(order.status)?'active':''}">
-    <div class="circle"></div><span class="label">Ordered</span>
-  </div>
+    ${order.status==='Lucky'
+      ? `<p style="color:red;font-weight:bold;font-size:16px;">"🎉 Check your ticket number after 24 hours. Login with your phone number. 🎉 in this website[link]"</p>`
+      : ''}
+
+    ${order.items.map((item,index)=>`
+      <div style="display:flex; gap:10px; border:2px solid #ccc; padding:5px; border-radius:5px; margin-top:5px;">
+        <div style="width:150px;">
+          <img src="${item.image}" style="width:90px;height:95px;object-fit:cover;">
+          <p style="margin:0;"><strong>${item.name}</strong></p>
+          <p style="margin:0;">Qty: ${item.qty}</p>
+          <p style="margin:0;">Price:<strong> ₹${item.price}</strong></p>
+        </div>
+        <div style="flex:1;">
+          <div class="status-tracker-wrapper">
+            <div class="status-tracker collapsed" id="statusTracker-${order._id}-${index}">
+              <div class="step ${order.status==='Cancelled' || ['Ordered','Packed','Shipped','Out for Delivery','Delivered'].includes(order.status)?'active':''}">
+                <div class="circle"></div><span class="label">Ordered</span>
+              </div>
+              
+
   <div class="step ${order.status==='Cancelled' || ['Packed','Shipped','Out for Delivery','Delivered'].includes(order.status)?'active':''}">
     <div class="circle"></div><span class="label">Packed</span>
   </div>
@@ -206,4 +211,3 @@ function toggleStatusView(trackerId,btn){
 
 </body>
 </html>
-
