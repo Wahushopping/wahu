@@ -146,9 +146,17 @@ fetch("https://wahuserver.onrender.com/api/orders/my", {
     <p><strong>Phone:</strong> ${order.address?.phone || ""}</p>
     <p><strong>Total:</strong> ₹${order.total}</p>
 
-    ${order.status==='Lucky'
-      ? `<p style="color:red;font-weight:bold;font-size:16px;">"🎉 Check your ticket number after 24 hours. Login with your phone number. 🎉 in this website[https://lucky-tau-green.vercel.app]"</p>`
-      : ''}
+    ${order.status === 'Lucky'
+  ? `
+    <p style="color:green;font-weight:bold;font-size:16px;">
+      🎉 Check your ticket number after 24 hours. Login this no. ${order.address?.phone || ""}. 🎉 
+      <a href="https://lucky-tau-green.vercel.app/" style="color:blue;text-decoration:none;">
+        Click here..
+      </a>
+    </p>
+  `
+  : ''
+}
 
     ${order.items.map((item,index)=>`
       <div style="display:flex; gap:10px; border:2px solid #ccc; padding:5px; border-radius:5px; margin-top:5px;">
@@ -211,4 +219,5 @@ function toggleStatusView(trackerId,btn){
 
 </body>
 </html>
+
 
