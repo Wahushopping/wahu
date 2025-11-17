@@ -31,6 +31,7 @@
     <!-- Price Summary -->
     <section>
       <h3>Price Details</h3>
+      
       <p>Total: ₹<span id="total"></span></p>
       <p>Discount: ₹<span id="discount"></span></p>
       <p><strong>Payable: ₹ <span id="payable" style="color: rgb(47, 153, 15); font-size: large; font-weight: 20px;"></span></strong></p>
@@ -38,6 +39,9 @@
 
     <button onclick="startPayment(checkoutData.finalAmount)">
   Pay Now 
+</button>
+<button onclick="placeCODOrder('COD')" style="margin-top:10px;">
+  Cash on Delivery (COD)
 </button>
 
 
@@ -104,6 +108,8 @@
     div.style.padding = "10px 0";
     div.innerHTML = `
       <strong>${item.name}</strong><br/>
+      
+
       Size: ${item.size} | Qty: ${item.qty} <br/>
       Price: ₹${item.price} | Subtotal: ₹${item.qty * item.price}
     `;
@@ -117,43 +123,47 @@
 
   // ✅ Save Order After Successful Payment
   function placeCODOrder(paymentId) {
-    const a = user.address;
-    const fullAddress = `${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}, ${a.city}, ${a.state} - ${a.pincode}`;
+  const a = user.address;
+  const fullAddress = `${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}, ${a.city}, ${a.state} - ${a.pincode}`;
 
-    const orderData = {
-      items: checkoutData.cart,
-      total: checkoutData.total,
-      discount: checkoutData.discount,
-      finalAmount: checkoutData.finalAmount,
-      paymentMethod: "Razorpay",
-      address: { ...a, fullAddress },
-      razorpayPaymentId: paymentId
-    };
+  const orderData = {
+    items: checkoutData.cart,
+    total: checkoutData.total,
+    discount: checkoutData.discount,
+    finalAmount: checkoutData.finalAmount,
+    paymentMethod: paymentId === "COD" ? "COD" : "Razorpay",
+    address: { ...a, fullAddress },
+    razorpayPaymentId: paymentId === "COD" ? null : paymentId
+  };
 
-    fetch("https://wahuserver.onrender.com/api/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(orderData)
+  fetch("http://localhost:5000/api/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(orderData)
+  })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("orderStatus").textContent =
+        paymentId === "COD"
+          ? "Order placed successfully with Cash on Delivery!"
+          : "Payment successful! Order placed.";
+
+      sessionStorage.removeItem("checkoutData");
+      setTimeout(() => window.location.href = "orders.html", 2000);
     })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("orderStatus").textContent =
-          "Payment successful! Order placed.";
-        sessionStorage.removeItem("checkoutData");
-        setTimeout(() => window.location.href = "orders.html", 2000);
-      })
-      .catch(err => {
-        alert("Order failed. Try again.");
-        console.error(err);
-      });
-  }
+    .catch(err => {
+      alert("Order failed. Try again.");
+      console.error(err);
+    });
+}
+
 
  async function startPayment(totalAmount) {
   try {
-    const res = await fetch("https://wahuserver.onrender.com/api/razorpay/create-order", {
+    const res = await fetch("http://localhost:5000/api/razorpay/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: totalAmount })
@@ -229,5 +239,7 @@
 
 </body>
 </html>
+
+
 
 
