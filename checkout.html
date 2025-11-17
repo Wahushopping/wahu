@@ -133,7 +133,7 @@
       razorpayPaymentId: paymentId
     };
 
-    fetch("http://localhost:5000/api/orders", {
+    fetch("https://wahuserver.onrender.com/api/orders", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -156,7 +156,7 @@
 
  async function startPayment(totalAmount) {
   try {
-    const res = await fetch("http://localhost:5000/api/razorpay/create-order", {
+    const res = await fetch("https://wahuserver.onrender.com/api/razorpay/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: totalAmount })
@@ -232,6 +232,7 @@
 
 </body>
 </html>
+
 
 
 
