@@ -40,9 +40,6 @@
     <button onclick="startPayment(checkoutData.finalAmount)">
   Pay Now 
 </button>
-<button onclick="placeCODOrder('COD')" style="margin-top:10px;">
-  Cash on Delivery (COD)
-</button>
 
 
     <div id="orderStatus" style="margin-top:15px; color:green;"></div>
@@ -123,43 +120,39 @@
 
   // ✅ Save Order After Successful Payment
   function placeCODOrder(paymentId) {
-  const a = user.address;
-  const fullAddress = `${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}, ${a.city}, ${a.state} - ${a.pincode}`;
+    const a = user.address;
+    const fullAddress = `${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}, ${a.city}, ${a.state} - ${a.pincode}`;
 
-  const orderData = {
-    items: checkoutData.cart,
-    total: checkoutData.total,
-    discount: checkoutData.discount,
-    finalAmount: checkoutData.finalAmount,
-    paymentMethod: paymentId === "COD" ? "COD" : "Razorpay",
-    address: { ...a, fullAddress },
-    razorpayPaymentId: paymentId === "COD" ? null : paymentId
-  };
+    const orderData = {
+      items: checkoutData.cart,
+      total: checkoutData.total,
+      discount: checkoutData.discount,
+      finalAmount: checkoutData.finalAmount,
+      paymentMethod: "Razorpay",
+      address: { ...a, fullAddress },
+      razorpayPaymentId: paymentId
+    };
 
-  fetch("http://localhost:5000/api/orders", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(orderData)
-  })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("orderStatus").textContent =
-        paymentId === "COD"
-          ? "Order placed successfully with Cash on Delivery!"
-          : "Payment successful! Order placed.";
-
-      sessionStorage.removeItem("checkoutData");
-      setTimeout(() => window.location.href = "orders.html", 2000);
+    fetch("http://localhost:5000/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(orderData)
     })
-    .catch(err => {
-      alert("Order failed. Try again.");
-      console.error(err);
-    });
-}
-
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("orderStatus").textContent =
+          "Payment successful! Order placed.";
+        sessionStorage.removeItem("checkoutData");
+        setTimeout(() => window.location.href = "orders.html", 2000);
+      })
+      .catch(err => {
+        alert("Order failed. Try again.");
+        console.error(err);
+      });
+  }
 
  async function startPayment(totalAmount) {
   try {
