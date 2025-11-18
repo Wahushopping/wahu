@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Successful</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+      background: linear-gradient(135deg, #f5b27b 0%, #764ba2 100%);
+      color: white;
+      overflow: hidden;
+      margin: 0;
+    }
+    .success-box {
+      border: 2px solid #28a745;
+      padding: 30px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 50px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      animation: slideInFromBottom 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      position: relative;
+    }
+    h1 {
+      color: #28a745;
+      font-size: 2.5em;
+      animation: fadeInSlide 2.5s ease-out;
+      margin: 0;
+      animation: glowBounce 1.8s ease-out;
+      text-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+    }
+    p {
+      font-size: 1.2em;
+      margin: 20px 0;
+      animation: fadeInSlide 2.2s ease-out;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+    .checkmark-container {
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .ring {
+      width: 200px;
+      height: 200px;
+      border: 8px solid rgba(255, 255, 255, 0.3);
+      border-top: 9px solid #e77d03;
+      border-radius: 50%;
+      position: absolute;
+      animation: rotateRing 4s linear forwards;
+      box-shadow: 0 0 30px rgba(230, 128, 13, 0.6);
+    }
+    .checkmark {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fc8905, #20c997);
+      position: absolute;
+      opacity: 0;
+      animation: showCheckmark 0.5s ease-out 3s forwards;
+      box-shadow: 0 0 30px rgba(40, 167, 69, 0.6);
+    }
+    .checkmark::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 35px;
+      height: 170px;
+      border: solid rgb(216, 216, 216);
+      border-width: 0 12px 12px 0;
+      transform: translate(-50%, -50%) rotate(45deg);
+      animation: drawCheckSmooth 0.8s ease-out 3.2s both;
+    }
+    button {
+      padding: 15px 25px;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      animation: fadeInSlide 2.5s ease-out;
+      opacity: 0;
+      animation-fill-mode: forwards;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    }
+    button:hover {
+      background: linear-gradient(135deg, #218838, #17a2b8);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.5);
+    }
+    .confetti {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #ffd700;
+      animation: fallRotate 4s linear infinite;
+      border-radius: 50%;
+    }
+    .confetti-piece:nth-child(odd) {
+      background: #ff69b4;
+    }
+    .confetti-piece:nth-child(3n) {
+      background: #00ced1;
+    }
+    .confetti-piece:nth-child(5n) {
+      background: #ff4500;
+    }
+    @keyframes slideInFromBottom {
+      from { opacity: 0; transform: translateY(100px) scale(0.8); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes glowBounce {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.1); }
+      70% { transform: scale(0.95); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes rotateRing {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(1080deg); } /* 3 full rotations */
+    }
+    @keyframes showCheckmark {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes drawCheckSmooth {
+      from { width: 0; height: 0; opacity: 0; }
+      to { width: 25px; height: 50px; opacity: 1; }
+    }
+    @keyframes fallRotate {
+      from { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+      to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="confetti" id="confetti"></div>
+
+  <div class="success-box">
+    <div class="checkmark-container">
+      <div class="ring"></div>
+      <div class="checkmark"></div>
+    </div>
+    <p style="animation-delay: 4.5s; color: green; font-weight: bold;">🎉 Order Placed Successfully!</p>
+    <p style="animation-delay: 4.5s;">Your order has been received. We will process it soon.</p>
+    <button style="animation-delay: 4.5s;" onclick="window.location.href='orders.html'">View Orders</button>
+  </div>
+
+  <script>
+    // Generate confetti pieces with more variety
+    const confettiContainer = document.getElementById('confetti');
+    for (let i = 0; i < 100; i++) {
+      const piece = document.createElement('div');
+      piece.classList.add('confetti-piece');
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.animationDelay = Math.random() * 4 + 's';
+      piece.style.animationDuration = (Math.random() * 3 + 3) + 's';
+      piece.style.width = (Math.random() * 10 + 5) + 'px';
+      piece.style.height = piece.style.width;
+      confettiContainer.appendChild(piece);
+    }
+  </script>
+
+</body>
+</html>
