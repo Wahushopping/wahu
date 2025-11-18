@@ -6,7 +6,9 @@
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <title>Checkout - WahuShop</title>
   <link rel="stylesheet" href="checkout.css" />
+  
 </head>
+
 <body>
   <header>
     <div class="logo">
@@ -37,13 +39,32 @@
       <p><strong>Payable: ₹ <span id="payable" style="color: rgb(47, 153, 15); font-size: large; font-weight: 20px;"></span></strong></p>
     </section>
 
-    <button onclick="startPayment(checkoutData.finalAmount)">
-  Pay Now 
+    <button onclick="startPayment(checkoutData.finalAmount)" style="background:green;" >
+  Pay Now (online)
 </button>
-
+<button onclick="openCODConfirm()" 
+        style="margin-top:10px; background:black; color:white; width: 100%;">
+  Cash on Delivery (COD)
+</button>
 
     <div id="orderStatus" style="margin-top:15px; color:green;"></div>
   </main>
+
+
+
+
+  <!-- COD Confirmation Popup -->
+<div id="codConfirmBox" class="popup-overlay">
+  <div class="popup-box">
+    <h3>Are you sure?</h3>
+    <p>Do you want to place this order by COD?</p>
+
+    <button id="codYes" class="popup-btn yes">Yes</button>
+    <button id="codNo" class="popup-btn no">No</button>
+  </div>
+</div>
+
+
 
    <!-- Add this in your HTML file -->
   <footer>
@@ -117,6 +138,69 @@
   document.getElementById("total").textContent = checkoutData.total;
   document.getElementById("discount").textContent = checkoutData.discount;
   document.getElementById("payable").textContent = checkoutData.finalAmount;
+
+function placeCOD() {
+  if (!user || !user.address || !user.address.city) {
+    alert("Please add a valid address before COD.");
+    return;
+  }
+
+  const a = user.address;
+  const fullAddress = `${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}, ${a.city}, ${a.state} - ${a.pincode}`;
+
+  const orderData = {
+    items: checkoutData.cart,
+    total: checkoutData.total,
+    discount: checkoutData.discount,
+    finalAmount: checkoutData.finalAmount,
+    paymentMethod: "COD",
+    address: { ...a, fullAddress }
+  };
+
+  fetch("https://wahuserver.onrender.com/api/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(orderData)
+  })
+    .then(res => res.json())
+    .then(data => {
+      sessionStorage.removeItem("checkoutData");
+window.location.href = "order-success.html";
+
+    })
+    .catch(err => {
+      alert("Order failed. Try again.");
+      console.error(err);
+    });
+}
+function openCODConfirm() {
+  const box = document.getElementById("codConfirmBox");
+  box.style.display = "block";
+}
+
+document.getElementById("codNo").onclick = function() {
+  closePopup();
+};
+
+function closePopup() {
+  const box = document.getElementById("codConfirmBox");
+
+  // smooth fade-out animation
+  box.style.animation = "fadeOut 0.3s forwards";
+
+  setTimeout(() => {
+    box.style.display = "none";
+    box.style.animation = ""; // reset
+  }, 300);
+}
+
+document.getElementById("codYes").onclick = function() {
+  closePopup();
+  setTimeout(() => placeCOD(), 250); // slight delay for smooth animation
+};
 
   // ✅ Save Order After Successful Payment
   function placeCODOrder(paymentId) {
@@ -232,8 +316,6 @@
 
 </body>
 </html>
-
-
 
 
 
