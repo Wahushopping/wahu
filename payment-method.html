@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Affiliate Payments & Withdrawals - Wahu</title>
+
+  <style>
+    body { font-family: Poppins; padding: 20px; background:#f7f7f7; }
+
+    h2 { margin-top: 25px; }
+
+    .box {
+      padding: 20px;
+      background:white;
+      border-radius:8px;
+      box-shadow:0 1px 4px rgba(0,0,0,0.1);
+      margin-bottom:25px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius:5px;
+      border:1px solid #ccc;
+    }
+
+    button {
+      width:100%;
+      padding:12px;
+      background:green;
+      color:white;
+      border:none;
+      border-radius:6px;
+      margin-top:10px;
+      cursor:pointer;
+      font-size:15px;
+    }
+
+    .history-item {
+      padding: 15px;
+      background:white;
+      border-radius:8px;
+      margin-bottom:10px;
+      border-left:4px solid green;
+      box-shadow:0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .status-pending { color:orange; font-weight:bold; }
+    .status-approved { color:green; font-weight:bold; }
+    .status-rejected { color:red; font-weight:bold; }
+    header {
+  background: #ffffff;
+  padding: 10px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 15px;
+}
+
+/* Navigation Container */
+.aff-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 10px;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.nav-btn {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  color: white;
+  font-size: 15px;
+  transition: 0.3s ease;
+}
+
+/* Button Colors */
+.nav-btn.pending {
+  background: #ff9800; /* orange */
+  color: black;
+}
+
+.nav-btn.rejected {
+  background: #f44336; /* red */
+}
+
+.nav-btn.approved {
+  background: #4caf50; /* green */
+}
+
+.nav-btn.back {
+  background: #2196f3; /* blue */
+}
+
+/* Hover Effect */
+.nav-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+/* Responsive for Mobile */
+@media (max-width: 480px) {
+  .nav-btn {
+    font-size: 13px;
+    padding: 8px 0;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <header>
+  <div class="aff-nav">
+    <a href="affiliate-dashboard.html" class="nav-btn back">Dashboard</a>
+    <a href="pending-orders.html" class="nav-btn pending">Pending</a>
+    <a href="rejected-orders.html" class="nav-btn rejected">Rejected</a>
+    <a href="approved-orders.html" class="nav-btn approved">Earning</a>
+  </div>
+</header>
+
+
+<!-- PAGE HEADING -->
+<h1>Affiliate Payment & Withdrawal</h1>
+
+
+
+<!-- ========================================================= -->
+<!-- 1️⃣ PAYMENT METHOD SECTION -->
+<!-- ========================================================= -->
+<h2>Payment Method</h2>
+
+<div class="box">
+
+  <select id="method">
+    <option value="">Select Method</option>
+    <option value="UPI">UPI</option>
+    <option value="Bank">Bank Account</option>
+  </select>
+
+  <input type="text" id="upi" placeholder="Enter UPI ID" style="display:none;">
+
+  <input type="text" id="accNo" placeholder="Account Number" style="display:none;">
+  <input type="text" id="ifsc" placeholder="IFSC Code" style="display:none;">
+  <input type="text" id="holder" placeholder="Account Holder Name" style="display:none;">
+
+  <button id="savePayment">Save Payment Method</button>
+</div>
+
+
+
+<!-- ========================================================= -->
+<!-- 2️⃣ WITHDRAW COMMISSION SECTION -->
+<!-- ========================================================= -->
+<h2>Withdraw Commission</h2>
+
+<div class="box">
+  <p><strong>Available Balance:</strong> <span id="balance">Loading...</span></p>
+<p><strong>You Will Get After 6% Fee:</strong> <span id="finalBalance">Loading...</span></p>
+
+  <p style="color:gray; font-size:13px;">*A 6% platform fee will be deducted on withdrawal.</p>
+
+
+  <button id="withdrawBtn">Request Withdrawal</button>
+</div>
+
+
+
+
+<!-- ========================================================= -->
+<!-- 3️⃣ WITHDRAW HISTORY SECTION -->
+<!-- ========================================================= -->
+<h2>Your Withdrawal History</h2>
+
+<div class="box" id="withdrawHistory">Loading...</div>
+
+
+
+
+<!-- ========================================================= -->
+<!-- JAVASCRIPT SECTION -->
+<!-- ========================================================= -->
+
+<script>
+const token = localStorage.getItem("token");
+
+/* ---------------------------------------------
+   LOAD PAYMENT INFO + SHOW INPUTS BASED ON TYPE
+-----------------------------------------------*/
+document.getElementById("method").onchange = () => {
+  let m = document.getElementById("method").value;
+
+  document.getElementById("upi").style.display = m === "UPI" ? "block" : "none";
+  document.getElementById("accNo").style.display = m === "Bank" ? "block" : "none";
+  document.getElementById("ifsc").style.display = m === "Bank" ? "block" : "none";
+  document.getElementById("holder").style.display = m === "Bank" ? "block" : "none";
+};
+
+fetch("http://localhost:5000/api/affiliate/me", {
+  headers: { Authorization: "Bearer " + token }
+})
+.then(res => res.json())
+.then(data => {
+
+  const totalBalance = data.commissionEarned || 0;
+const finalAfterFee = Math.floor(totalBalance - totalBalance * 0.06);
+
+document.getElementById("balance").innerText = "₹" + totalBalance;
+document.getElementById("finalBalance").innerText = "₹" + finalAfterFee;
+
+
+  // Pre-fill payment details
+  if (!data.paymentMethod) return;
+
+  document.getElementById("method").value = data.paymentMethod;
+
+  if (data.paymentMethod === "UPI") {
+    document.getElementById("upi").style.display = "block";
+    document.getElementById("upi").value = data.upi;
+  } else {
+    document.getElementById("accNo").style.display = "block";
+    document.getElementById("ifsc").style.display = "block";
+    document.getElementById("holder").style.display = "block";
+
+    document.getElementById("accNo").value = data.bank?.accNo || "";
+    document.getElementById("ifsc").value = data.bank?.ifsc || "";
+    document.getElementById("holder").value = data.bank?.holder || "";
+  }
+});
+
+
+/* ---------------------------------------------
+   SAVE PAYMENT METHOD
+-----------------------------------------------*/
+document.getElementById("savePayment").onclick = () => {
+  const method = document.getElementById("method").value;
+  const upi = document.getElementById("upi").value;
+
+  const accNo = document.getElementById("accNo").value;
+  const ifsc = document.getElementById("ifsc").value;
+  const holder = document.getElementById("holder").value;
+
+  fetch("http://localhost:5000/api/affiliate/payment-method", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({ method, upi, bank: { accNo, ifsc, holder } })
+  })
+  .then(res => res.json())
+  .then(data => alert(data.message));
+};
+
+
+
+/* ---------------------------------------------
+   WITHDRAW REQUEST
+-----------------------------------------------*/
+document.getElementById("withdrawBtn").onclick = async () => {
+
+  // 1️⃣ Fetch affiliate data
+  const res = await fetch("http://localhost:5000/api/affiliate/me", {
+    headers: { Authorization: "Bearer " + token }
+  });
+
+  const data = await res.json();
+  const totalBalance = data.commissionEarned || 0;
+
+  if (totalBalance <= 0) {
+    alert("No balance available for withdrawal.");
+    return;
+  }
+
+  // 2️⃣ Apply 6% fee
+  const fee = totalBalance * 0.06;
+  const finalAmount = Math.floor(totalBalance - fee); // send ONLY this
+
+  // 3️⃣ Confirm with user
+  if (!confirm(
+    `Total Commission: ₹${totalBalance}\n` +
+    `6% Platform Fee: ₹${fee.toFixed(2)}\n\n` +
+    `Withdrawable Amount: ₹${finalAmount}\n\n` +
+    `Do you want to proceed?`
+  )) return;
+
+  // 4️⃣ SEND ONLY finalAmount to backend
+  fetch("http://localhost:5000/api/affiliate/withdraw", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({ amount: finalAmount })  // ⭐ ONLY SEND THIS
+  })
+  .then(res => res.json())
+  .then(result => {
+    alert(result.message || "Withdrawal requested successfully.");
+  });
+};
+
+
+
+
+/* ---------------------------------------------
+   LOAD WITHDRAW HISTORY
+-----------------------------------------------*/
+/* ---------------------------------------------
+   LOAD WITHDRAW HISTORY  (FIXED WITH FEE DETAILS)
+-----------------------------------------------*/
+fetch("http://localhost:5000/api/affiliate/withdraw-history", {
+  headers: { Authorization: "Bearer " + token }
+})
+.then(res => res.json())
+.then(list => {
+  const box = document.getElementById("withdrawHistory");
+
+  if (!list || list.length === 0) {
+    box.innerHTML = "<p>No withdrawal history found.</p>";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  list.forEach(w => {
+
+  const originalAmount = Number(w.amount);       // requested amount
+  const fee = Math.floor(originalAmount * 0.06); // 6% fee
+  const finalAmount = originalAmount - fee;      // amount user receives
+
+  const statusClass =
+    w.status === "Pending"
+      ? "status-pending"
+      : w.status === "Approved"
+      ? "status-approved"
+      : "status-rejected";
+
+  let receiveHTML = "";
+
+  // ⭐ Only show final received amount when approved
+  if (w.status === "Approved") {
+    receiveHTML = `
+      <p><strong>You Received:</strong> 
+        <span style="color:green; font-weight:600;">₹${finalAmount}</span>
+      </p>
+    `;
+  } else if (w.status === "Pending") {
+    receiveHTML = `<p style="color:orange;"><strong>Waiting for approval...</strong></p>`;
+  } else {
+    receiveHTML = `<p style="color:red;"><strong>Request Rejected</strong></p>`;
+  }
+
+  box.innerHTML += `
+    <div class="history-item">
+
+      ${receiveHTML}
+
+      <p><strong>Requested Amount:</strong> ₹${originalAmount}</p>
+      <p><strong>Platform Fee (6%):</strong> -₹${fee}</p>
+
+      <p style="font-size:13px; color:gray;">
+        (6% Platform fee deducted at withdrawal)
+      </p>
+
+      
+
+      ${
+        w.method === "UPI"
+        ? `<p><strong>UPI:</strong> ${w.upi}</p>`
+        : `
+          <p><strong>Account No:</strong> ${w.bank.accNo}</p>
+          <p><strong>IFSC:</strong> ${w.bank.ifsc}</p>
+         
+        `
+      }
+
+      <p class="${statusClass}">
+        <strong>Status:</strong> ${w.status}
+      </p>
+
+      <p><strong>Date:</strong> ${new Date(w.createdAt).toLocaleString()}</p>
+
+    </div>
+  `;
+});
+
+
+
+});
+
+</script>
+
+</body>
+</html>

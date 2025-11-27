@@ -25,9 +25,17 @@
       <a href="address.html" class="btn">Add / Update Address</a>
       <br>
       <a href="orders.html" class="btn"> My Orders</a>
-      <button onclick="logout()" style="margin-top: 20px;">Logout</button>
+      
 
-      <br><br>
+      <br>
+      <button onclick="window.location.href='affiliate-dashboard.html'">
+  Affiliate Dashboard
+</button>
+<button onclick="window.location.href='affiliate-register.html'">
+  Become an Affiliate
+</button>
+<button onclick="logout()" style="margin-top: 20px; background-color: rgb(0, 0, 0); color: white;">Logout</button>
+      <br>
       
       <h3>Your Wishlist ❤️</h3>
 <div id="wishlist" class="wishlist-grid"></div>
@@ -48,6 +56,7 @@
         <a href="Privacy.html"style="color:rgb(27, 27, 27)"><h5>Privacy Policy</h5></a>
         <a href="Return.html" style="color:rgb(27, 27, 27)"><h5>Return Policy</h5></a>
         <a href="Help.html" style="color:rgb(27, 27, 27)"><h5>Help Center</h5></a>
+        <a href="contact.html" style="color:rgb(27, 27, 27)"><h5>Contact Us</h5></a>
       </div>
     </section>
   </div>
@@ -80,6 +89,8 @@
 
   <!-- ✅ Profile Script -->
   <script>
+    
+
     document.addEventListener("DOMContentLoaded", async function () {
       const token = localStorage.getItem("token");
 
@@ -90,7 +101,7 @@
       }
 
      try {
-  const res = await fetch("https://wahuserver.onrender.com/api/users/me", {
+  const res = await fetch("http://localhost:5000/api/users/me", {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -109,6 +120,7 @@
   if (!text) {
     throw new Error("EmptyResponse");
   }
+  
   const user = JSON.parse(text);
 
   localStorage.setItem("user", JSON.stringify(user));
@@ -187,7 +199,7 @@ async function loadWishlist() {
   }
 
   try {
-    const res = await fetch("https://wahuserver.onrender.com/api/wishlist", {
+    const res = await fetch("http://localhost:5000/api/wishlist", {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -241,7 +253,7 @@ async function removeFromWishlist(productId) {
   }
 
   try {
-    const res = await fetch(`https://wahuserver.onrender.com/api/wishlist/remove/${productId}`, {
+    const res = await fetch(`http://localhost:5000/api/wishlist/remove/${productId}`, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` }
     });
@@ -270,7 +282,7 @@ function toggleWishlist(product) {
     return;
   }
 
-  fetch("https://wahuserver.onrender.com/api/wishlist/toggle", {
+  fetch("http://localhost:5000/api/wishlist/toggle", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -304,7 +316,7 @@ document.addEventListener("DOMContentLoaded", loadWishlist);
   <script>
     const trendingList = document.getElementById("trending-list");
 
-    fetch("https://wahuserver.onrender.com/api/trending")
+    fetch("http://localhost:5000/api/trending")
       .then(res => res.json())
       .then(products => {
         if (!products.length) {
@@ -322,7 +334,7 @@ document.addEventListener("DOMContentLoaded", loadWishlist);
           if (product.moreImages && product.moreImages.length > 0) {
             imageUrl = product.moreImages[0].url || product.moreImages[0];
           } else if (product.image) {
-            imageUrl = product.image.url || `https://wahuserver.onrender.com/uploads/${product.image}`;
+            imageUrl = product.image.url || `http://localhost:5000/uploads/${product.image}`;
           }
 
           card.innerHTML = `
@@ -343,4 +355,3 @@ document.addEventListener("DOMContentLoaded", loadWishlist);
 </body>
 
 </html>
-

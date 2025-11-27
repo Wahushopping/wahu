@@ -33,6 +33,9 @@
 
       <!-- Product Info -->
       <div class="product-info">
+
+         
+
         <h3 id="product-name" style="color: black;">Loading...</h3>
         <b>★★★★☆</b>
         <p id="product-price"></p>
@@ -98,8 +101,33 @@
   <!-- Product Logic -->
   <script>
     const params = new URLSearchParams(window.location.search);
-    const productId = params.get('id');
+    const ref = params.get("ref");
 
+    // ⭐ ADD CLICK LOGGING HERE ⭐
+    if (ref) {
+      
+
+      const payload = JSON.stringify({
+        ref,
+        productId: params.get("id"),
+        city: localStorage.getItem("city") || "Unknown"
+      });
+
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: "application/json" });
+        navigator.sendBeacon("http://localhost:5000/api/affiliate/click", blob);
+      } else {
+        fetch("http://localhost:5000/api/affiliate/click", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload
+        }).catch(err => console.error("Click tracking error:", err));
+      }
+    }
+
+
+    const productId = params.get('id');
+    
     const productName = document.getElementById('product-name');
     const productOption = document.getElementById('product-Option');
     const productPrice = document.getElementById('product-price');
@@ -112,23 +140,29 @@
     let currentProduct = null;
     let currentImageIndex = 0;
 
+   
+
+
     // Handle Image URLs consistently
     function getImageUrl(image) {
       if (!image) return "default-placeholder.png";
       if (typeof image === "string") return image;
       if (image.url) return image.url;
-      return `https://wahuserver.onrender.com/uploads/${image}`;
+      return `http://localhost:5000/uploads/${image}`;
     }
 
     // Fetch product details
     async function fetchProductDetails() {
       try {
-        const res = await fetch(`https://wahuserver.onrender.com/api/products/${productId}`);
+        const res = await fetch(`http://localhost:5000/api/products/${productId}`);
         const product = await res.json();
         currentProduct = product;
 
         // Display basic details
         productName.textContent = product.name;
+        
+
+
         productOption.textContent = product.option;
 
         const original = product.originalprice || product.originalPrice;
@@ -165,24 +199,100 @@
           });
         }
 
-        // Display images
-        if (product.moreImages?.length) {
-          mainImage.src = getImageUrl(product.moreImages[0]);
-          product.moreImages.forEach((imgSrc, index) => {
-            const img = document.createElement("img");
-            img.src = getImageUrl(imgSrc);
-            if (index === 0) img.classList.add("active");
-            img.addEventListener("click", () => {
-              document.querySelectorAll(".thumbnail-images img").forEach(i => i.classList.remove("active"));
-              img.classList.add("active");
-              mainImage.src = img.src;
-              currentImageIndex = index;
-            });
-            thumbnailContainer.appendChild(img);
-          });
-        } else {
-          mainImage.src = getImageUrl(product.image);
-        }
+       // Display images
+if (product.moreImages?.length) {
+  mainImage.src = getImageUrl(product.moreImages[0]);
+  product.moreImages.forEach((imgSrc, index) => {
+    const img = document.createElement("img");
+    img.src = getImageUrl(imgSrc);
+    if (index === 0) img.classList.add("active");
+    img.addEventListener("click", () => {
+      document.querySelectorAll(".thumbnail-images img").forEach(i => i.classList.remove("active"));
+      img.classList.add("active");
+      mainImage.src = img.src;
+      currentImageIndex = index;
+    });
+    thumbnailContainer.appendChild(img);
+  });
+}
+
+// ⭐⭐⭐ ADD THE DRAG/SLIDER CODE HERE ⭐⭐⭐
+
+let isDragging = false;
+let startX = 0;
+
+mainImage.addEventListener("mousedown", (e) => {
+  isDragging = true;
+  startX = e.pageX;
+});
+
+mainImage.addEventListener("mouseup", (e) => {
+  if (!isDragging) return;
+  isDragging = false;
+
+  const endX = e.pageX;
+  const diff = endX - startX;
+
+  if (diff > 50) showPreviousImage();
+  if (diff < -50) showNextImage();
+});
+
+mainImage.addEventListener("mouseleave", () => {
+  isDragging = false;
+});
+
+mainImage.addEventListener("touchstart", (e) => {
+  startX = e.touches[0].clientX;
+});
+
+mainImage.addEventListener("touchend", (e) => {
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if (diff > 50) showPreviousImage();
+  if (diff < -50) showNextImage();
+});
+
+function showNextImage() {
+  if (!currentProduct.moreImages) return;
+  currentImageIndex = (currentImageIndex + 1) % currentProduct.moreImages.length;
+  updateMainImage("left"); 
+}
+
+function showPreviousImage() {
+  if (!currentProduct.moreImages) return;
+  currentImageIndex =
+    (currentImageIndex - 1 + currentProduct.moreImages.length) %
+    currentProduct.moreImages.length;
+  updateMainImage("right");
+}
+
+
+function updateMainImage(direction = "left") {
+  const oldImage = mainImage;
+
+  // Add slide animation class
+  oldImage.classList.add(direction === "left" ? "slide-left" : "slide-right");
+
+  // After animation ends, replace image and reset position
+  setTimeout(() => {
+    oldImage.src = getImageUrl(currentProduct.moreImages[currentImageIndex]);
+    oldImage.classList.remove("slide-left", "slide-right");
+
+    // Add class for smooth reset
+    oldImage.classList.add("slide-reset");
+
+    setTimeout(() => {
+      oldImage.classList.remove("slide-reset");
+    }, 300); // End reset animation
+  }, 300);
+
+  // Update thumbnail highlight
+  document.querySelectorAll(".thumbnail-images img").forEach((img, i) => {
+    img.classList.toggle("active", i === currentImageIndex);
+  });
+}
+
 
         // Display video
         if (product.video) {
@@ -218,21 +328,30 @@ async function addToCart(product) {
     return;
   }
 
+  // 👇 get ?ref= from URL (you already have `params` and `ref` above, but this is safe)
+  const urlParams = new URLSearchParams(window.location.search);
+  const refFromUrl = urlParams.get("ref") || null;
+
   const item = {
     id: product._id,
     name: product.name,
-    image: product.moreImages?.[currentImageIndex]?.url 
-       || product.image?.url 
-       || product.moreImages?.[currentImageIndex] 
-       || product.image,
+    image: product.moreImages?.[currentImageIndex]?.url
+        || product.image?.url
+        || product.moreImages?.[currentImageIndex]
+        || product.image,
     title: product.title,
     size: selectedSize,
     price: product.price,
-    qty: 1
+    qty: 1,
+
+    // ⭐ VERY IMPORTANT: save affiliate ref with the item
+    ref: refFromUrl
   };
 
+
+
   try {
-    const res = await fetch("https://wahuserver.onrender.com/api/cart", {
+    const res = await fetch("http://localhost:5000/api/cart", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -282,7 +401,7 @@ async function toggleWishlist(product) {
   };
 
   try {
-    const res = await fetch("https://wahuserver.onrender.com/api/wishlist/toggle", {
+    const res = await fetch("http://localhost:5000/api/wishlist/toggle", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -300,19 +419,29 @@ async function toggleWishlist(product) {
 }
 const shareBtn = document.getElementById("shareBtn");
 
+
 shareBtn.addEventListener("click", () => {
   if (!currentProduct) return;
+
+  // Only affiliates can share referral links
+  const affiliateId = localStorage.getItem("affiliateId");
+
+  if (!affiliateId) {
+    alert("Only affiliate accounts can share product links with referral ID.");
+    return;
+  }
+
+  // Create correct referral link
+  const shareUrl = `${window.location.origin}${window.location.pathname}?id=${productId}&ref=${affiliateId}`;
 
   if (navigator.share) {
     navigator.share({
       title: currentProduct.name,
-      text: `Check out this product on WahuShop!`,
-      url: window.location.href
-    })
-    .then(() => console.log('✅ Product shared successfully'))
-    .catch(err => console.error('❌ Error sharing:', err));
+      text: "Check out this product!",
+      url: shareUrl
+    }).catch(() => {});
   } else {
-    alert("Sharing is not supported in your browser.");
+    prompt("Copy your referral link:", shareUrl);
   }
 });
 
@@ -330,7 +459,7 @@ shareBtn.addEventListener("click", () => {
     // Related products logic
     async function fetchRelatedProducts(currentProduct) {
       try {
-        const res = await fetch("https://wahuserver.onrender.com/api/products");
+        const res = await fetch("http://localhost:5000/api/products");
         const allProducts = await res.json();
         const related = allProducts
           .filter(p => p._id !== currentProduct._id && p.option === currentProduct.option)
@@ -366,6 +495,7 @@ shareBtn.addEventListener("click", () => {
 
     // Load product details on page load
     fetchProductDetails();
+
   </script>
 
   <!-- User login/logout + address -->
@@ -418,5 +548,3 @@ shareBtn.addEventListener("click", () => {
 
 </body>
 </html>
-
-

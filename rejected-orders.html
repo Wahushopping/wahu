@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Rejected Earnings - Wahu Affiliate</title>
+  <style>
+    body { 
+      font-family: Poppins; 
+      padding: 20px; 
+      background: #f7f7f7; 
+    }
+
+    .box {
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-left: 4px solid red;
+    }
+
+    .product {
+      padding: 10px;
+      background: #fff4f4;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 12px;
+      border-left: 4px solid red;
+      align-items: center;
+    }
+
+    .product img {
+      width: 70px;
+      height: 70px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .reject {
+      color: red;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+    .small-note {
+      font-size: 13px;
+      color: #444;
+    }
+
+    /* LEVEL BADGES */
+    .level-badge {
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:5px;
+      font-size:12px;
+      font-weight:bold;
+      color:white;
+      margin-left:4px;
+    }
+
+    .badge-Bronze { background:#cd7f32; }
+    .badge-Silver { background:#c0c0c0; color:black; }
+    .badge-Gold { background:#ffd700; color:black; }
+    .badge-Platinum { background:#7f8c8d; }
+    .badge-Diamond { background:#4ab4ff; }
+    /* Header Wrapper */
+header {
+  background: #ffffff;
+  padding: 12px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  margin-bottom: 18px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* Nav Container */
+.aff-nav {
+  display: flex;
+  gap: 10px;
+  padding: 0 12px;
+  flex-wrap: wrap;
+}
+
+/* Base Button */
+.nav-btn {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 15px;
+  transition: 0.25s ease-in-out;
+  color: white;
+}
+
+/* Colors */
+.back {
+  background: #2196f3; /* Blue */
+}
+
+.pending {
+  background: #ff9800; /* Orange */
+  color: black;        /* Good contrast */
+}
+
+.approved {
+  background: #4caf50; /* Green */
+}
+
+.withdraw {
+  background: #673ab7; /* Purple */
+}
+
+/* Hover Animation */
+.nav-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+/* Mobile Optimization */
+@media (max-width: 480px) {
+  .nav-btn {
+    font-size: 13px;
+    padding: 10px 0;
+  }
+}
+
+  </style>
+</head>
+<body>
+<header>
+  <div class="aff-nav">
+    <a href="affiliate-dashboard.html" class="nav-btn back">Dashboard</a>
+    <a href="pending-orders.html" class="nav-btn pending">Pending</a>
+    <a href="approved-orders.html" class="nav-btn approved">Earning</a>
+    <a href="payment-method.html" class="nav-btn withdraw">Withdraw</a>
+  </div>
+</header>
+
+<h2 style="color:red;">Rejected Earnings</h2>
+<p>These products/orders did not qualify for commission.</p>
+
+<div id="rejectedOrders">Loading...</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+fetch("http://localhost:5000/api/affiliate/orders", {
+  headers: { Authorization: "Bearer " + token }
+})
+.then(res => res.json())
+.then(orders => {
+  const box = document.getElementById("rejectedOrders");
+
+  if (!orders || orders.length === 0) {
+    box.innerHTML = "<p>No orders found.</p>";
+    return;
+  }
+
+  // ⭐ FILTER ORDERS WITH AT LEAST ONE REJECTED PRODUCT
+  const rejectedOrders = orders.filter(order =>
+    order.items.some(i => i.earningStatus === "Rejected")
+  );
+
+  if (rejectedOrders.length === 0) {
+    box.innerHTML = "<p style='color:green;'>No rejected earnings.</p>";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  rejectedOrders.forEach(order => {
+    let productHTML = "";
+
+    order.items
+      .filter(item => item.earningStatus === "Rejected")
+      .forEach(item => {
+        productHTML += `
+          <div class="product">
+            <img src="${item.image}" alt="Product">
+            
+            <div>
+              <p><strong>${item.title}</strong></p>
+
+              <p>
+                Level:
+                <span class="level-badge badge-${item.affiliateLevelAtTime}">
+                  ${item.affiliateLevelAtTime}
+                </span>
+              </p>
+
+              <p>Qty: ${item.qty}</p>
+              <p>Price: ₹${item.price}</p>
+
+              <p><strong>Commission:</strong> 
+                <span style="color:red;">₹0 (Rejected)</span>
+              </p>
+
+              <p class="reject">❌ This product was returned or cancelled.</p>
+            </div>
+          </div>
+        `;
+      });
+
+    const div = document.createElement("div");
+    div.className = "box";
+
+    div.innerHTML = `
+      <p><strong>Order ID:</strong> ${order._id}</p>
+
+      <p><strong>Order Status:</strong> 
+        <span style="color:red;">${order.status}</span>
+      </p>
+
+      <h4>Rejected Products:</h4>
+      ${productHTML}
+
+      <p class="small-note">Reason: Product returned/cancelled. No commission provided.</p>
+    `;
+
+    box.appendChild(div);
+  });
+});
+</script>
+
+</body>
+</html>

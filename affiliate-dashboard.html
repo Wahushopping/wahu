@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Affiliate Dashboard - Wahu</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <style>
+    .level-badge {
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:600;
+  color:white;
+}
+
+.badge-Bronze { background:#cd7f32; }
+.badge-Silver { background:#c0c0c0; color:black; }
+.badge-Gold { background:#ffd700; color:black; }
+.badge-Platinum { background:#7f8c8d; }
+.badge-Diamond { background:#4ab4ff; }
+
+               .history-item {
+  padding: 12px;
+  background: #fff;
+  border-radius: 6px;
+  border-left: 4px solid green;
+  margin-bottom: 10px;
+}
+.history-item p {
+  margin: 4px 0;
+}
+.status-pending { color: orange; font-weight: bold; }
+.status-approved { color: green; font-weight: bold; }
+.status-rejected { color: red; font-weight: bold; }
+
+    .box { padding: 20px; background: #f5f5f5; border-radius: 8px; margin-bottom: 20px; }
+    input, select { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; border: 1px solid #ccc; }
+    button { padding: 10px; width: 100%; background: green; color: white; border: none; border-radius: 6px; margin-top: 10px; }
+  
+  .status-pending { color: orange; font-weight: bold; }
+.status-processing { color: blue; font-weight: bold; }
+.status-shipped { color: #0a84ff; font-weight: bold; }
+.status-delivered { color: green; font-weight: bold; }
+.status-cancelled { color: red; font-weight: bold; }
+
+
+.level-display {
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+}
+
+
+  </style>
+  <style>
+  .aff-nav {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+  }
+
+  .nav-btn {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    color: white;
+    font-size: 15px;
+    transition: 0.3s;
+  }
+
+  .approved { background: green; }
+  .rejected { background: red; }
+  .pending { background: orange; color: black; }
+  .withdraw { background: #007bff; } /* Blue */
+
+  .nav-btn:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+  }
+
+
+
+  .chart-box {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#earnChart {
+  width: 100% !important;
+  height: 260px !important;
+}
+
+</style>
+<style>
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    align-items: start;
+  }
+
+  /* LEFT SIDE */
+  .left-panel {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  /* RIGHT SIDE = 4 stats boxes */
+  .right-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .stat-box {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  /* FULL WIDTH BOTTOM */
+  .full-width {
+    grid-column: span 2;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  /* Responsive for Mobile */
+  @media(max-width: 768px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .full-width {
+      grid-column: span 1;
+    }
+
+    .right-panel {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+<style>
+  #earnChart {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .id-row {
+  background-color: #bff8ad;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-radius: 10px;
+}
+
+.id-row p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#copyLink {
+  background: #ff8800;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+#copyLink:hover {
+  opacity: 0.85;
+}
+
+
+.stat-clicks {
+  background: #e3f2fd;   /* Light Blue */
+  border-left: 4px solid #2196f3;
+}
+
+.stat-orders {
+  background: #e8f5e9;   /* Light Green */
+  border-left: 4px solid #4caf50;
+}
+
+.stat-commission {
+  background: #fff8e1;   /* Light Yellow */
+  border-left: 4px solid #ffb300;
+}
+
+.stat-withdrawn {
+  background: #ffebee;   /* Light Red */
+  border-left: 4px solid #e53935;
+}
+
+</style>
+
+
+</head>
+<body>
+
+<header style="
+    background-color: #cd7f32;
+    padding: 20px;
+    text-align: center;
+    color: white;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+">
+  <h2 style="margin: 0; font-size: 24px;">Wahu Affiliate Dashboard</h2>
+
+  <p style="margin: 5px 0 0; font-size: 16px;">
+    Level: <span id="affiliateLevel">Loading...</span>
+  </p>
+
+  <p style="margin: 4px 0 0; font-size: 15px;">
+    <strong>Commission Per Order:</strong>
+    <span id="commissionPerOrder"></span>
+  </p>
+</header>
+
+<div class="aff-nav">
+  <a href="pending-orders.html" class="nav-btn pending">Pending</a>
+  <a href="rejected-orders.html" class="nav-btn rejected">Rejected</a>
+  <a href="approved-orders.html" class="nav-btn approved">Earning</a>
+  <a href="payment-method.html" class="nav-btn withdraw">Withdraw</a>
+</div>
+
+
+
+<section class="box dashboard-grid">
+
+  <!-- LEFT SECTION -->
+  <div class="left-panel">
+    <h3>Level Progress</h3>
+
+    <p><strong>Current Level:</strong> 
+  <span id="currentLevel" class="level-display">Loading...</span>
+</p>
+
+<p><strong>Next Level:</strong> 
+  <span id="nextLevel" class="level-display">Loading...</span>
+</p>
+
+    <p><strong>Orders Needed:</strong> <span id="ordersNeeded">Loading...</span></p>
+
+   
+   <div class="id-row">
+  <p><strong>ID:</strong> <span id="affiliateId">Loading...</span></p>
+  <button id="copyLink">Copy ID</button>
+</div>
+
+
+  
+
+  </div>
+
+  <div class="right-panel">
+
+  <div class="stat-box stat-clicks">
+    <h4>Clicks</h4>
+    <p id="clicks">0</p>
+  </div>
+
+  <div class="stat-box stat-orders">
+    <h4>Orders</h4>
+    <p id="orders">0</p>
+  </div>
+
+  <div class="stat-box stat-commission">
+    <h4>Total Commission</h4>
+    <p id="commission">₹0</p>
+  </div>
+
+  <div class="stat-box stat-withdrawn">
+    <h4>Total Withdrawn</h4>
+    <p id="withdrawn">₹0</p>
+  </div>
+
+</div>
+
+ 
+
+</section>
+
+
+
+
+<section class="box" style="background:white;">
+  <h3>Your Earnings Chart</h3>
+
+  <div style="width:100%; height:300px;">
+    <canvas id="earnChart"></canvas>
+  </div>
+</section>
+
+
+
+<section class="box">
+  <h3>Your Affiliate Orders</h3>
+  <div id="affiliateOrders">Loading orders...</div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const token = localStorage.getItem("token");
+fetch("http://localhost:5000/api/affiliate/analytics", {
+  headers: { Authorization: "Bearer " + token }
+})
+.then(res => res.json())
+.then(data => {
+  document.getElementById("totalClicks").innerText = data.clicks;
+  document.getElementById("uniqueClicks").innerText = data.uniqueIPs;
+  document.getElementById("repeatClicks").innerText = data.repeatClicks;
+  document.getElementById("conversionRate").innerText = data.conversionRate + "%";
+
+  document.getElementById("mobileDevice").innerText = data.deviceStats.mobile;
+  document.getElementById("desktopDevice").innerText = data.deviceStats.desktop;
+
+  // Cities
+  let cityHTML = "";
+  for (let city in data.cityStats) {
+    cityHTML += `<p>${city}: ${data.cityStats[city]}</p>`;
+  }
+  document.getElementById("cityStats").innerHTML = cityHTML;
+
+  // Product Stats
+  let productHTML = "";
+  data.productStats.forEach(p => {
+    productHTML += `<p>Product ID: ${p._id} – ${p.count} sales</p>`;
+  });
+  document.getElementById("productStats").innerHTML = productHTML;
+});
+
+// Load affiliate data
+fetch("http://localhost:5000/api/affiliate/me", {
+  headers: { Authorization: "Bearer " + token }
+})
+  .then(res => res.json())
+  .then(data => {
+
+    // BASIC DATA SET
+    document.getElementById("affiliateId").innerText = data.affiliateId;
+    document.getElementById("clicks").innerText = data.clicks;
+    document.getElementById("orders").innerText = data.orders;
+    document.getElementById("commission").innerText = "₹" + data.commissionEarned;
+    document.getElementById("withdrawn").innerText = "₹" + (data.totalWithdrawn || 0);
+    document.getElementById("affiliateLevel").innerText = data.level || "Bronze";
+
+    // COMMISSION PER LEVEL
+    const commissionPerOrder = getCommissionByLevel(data.level);
+    document.getElementById("commissionPerOrder").innerText = "₹" + commissionPerOrder;
+
+function applyLevelBadge(id, level) {
+  const el = document.getElementById(id);
+  el.className = "level-display badge-" + level;
+  el.innerText = level;
+}
+
+
+    // LEVEL SYSTEM
+   applyLevelBadge("currentLevel", data.level);
+
+let next = nextLevelName(data.level);
+if (next) {
+  applyLevelBadge("nextLevel", next);
+} else {
+  document.getElementById("nextLevel").innerText = "Max level";
+}
+
+
+    let currentOrders = data.orders;
+    let currentTarget = LEVEL_TARGETS[data.level];
+    let nextTarget = LEVEL_TARGETS[next];
+
+    if (!next) {
+      document.getElementById("ordersNeeded").innerText = "0 (Max level)";
+      document.getElementById("progressBar").style.width = "100%";
+    } else {
+      let totalNeeded = nextTarget - currentTarget;
+      let progress = currentOrders - currentTarget;
+      let percent = Math.min((progress / totalNeeded) * 100, 100);
+
+      document.getElementById("ordersNeeded").innerText =
+        (nextTarget - currentOrders) + " orders";
+
+      document.getElementById("progressBar").style.width = percent + "%";
+    }
+
+    // SAVE AFFILIATE ID FOR SHARING
+    localStorage.setItem("affiliateId", data.affiliateId);
+
+   document.getElementById("copyLink").onclick = () => {
+  const affiliateId = document.getElementById("affiliateId").innerText.trim();
+  
+  navigator.clipboard.writeText(affiliateId)
+    .then(() => alert("Affiliate ID copied: " + affiliateId))
+    .catch(() => alert("Failed to copy ID"));
+};
+
+
+    // LOAD PAYMENT DETAILS
+    loadPaymentDetails(data);
+
+    // ⭐⭐⭐ EARNINGS CHART ⭐⭐⭐
+fetch("http://localhost:5000/api/affiliate/earnings", {
+  headers: { Authorization: "Bearer " + token }
+})
+  .then(res => res.json())
+  .then(chartData => {
+
+    const ctx = document.getElementById("earnChart").getContext("2d");
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: chartData.days,
+        datasets: [{
+          label: "Daily Earnings",
+          data: chartData.amounts,
+          borderWidth: 3,
+          borderColor: "#28a745",
+          pointBackgroundColor: "#28a745",
+          tension: 0.3,      /* smooth curve */
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: "#444" }
+          },
+          x: {
+            ticks: { color: "#444" }
+          }
+        }
+      }
+    });
+
+  });
+
+
+
+  });
+
+// -------------------- PAYMENT METHOD RADIO --------------------
+document.getElementById("method").onchange = () => {
+  let m = document.getElementById("method").value;
+
+  document.getElementById("upi").style.display = m === "UPI" ? "block" : "none";
+  document.getElementById("accNo").style.display = m === "Bank" ? "block" : "none";
+  document.getElementById("ifsc").style.display = m === "Bank" ? "block" : "none";
+  document.getElementById("holder").style.display = m === "Bank" ? "block" : "none";
+};
+
+// -------------------- LOAD SAVED PAYMENT INFO --------------------
+function loadPaymentDetails(data) {
+  if (!data.paymentMethod) return;
+
+  document.getElementById("method").value = data.paymentMethod;
+
+  if (data.paymentMethod === "UPI") {
+    document.getElementById("upi").style.display = "block";
+    document.getElementById("upi").value = data.upi;
+  } else {
+    document.getElementById("accNo").style.display = "block";
+    document.getElementById("ifsc").style.display = "block";
+    document.getElementById("holder").style.display = "block";
+
+    document.getElementById("accNo").value = data.bank?.accNo || "";
+    document.getElementById("ifsc").value = data.bank?.ifsc || "";
+    document.getElementById("holder").value = data.bank?.holder || "";
+  }
+}
+
+// -------------------- SAVE PAYMENT METHOD --------------------
+document.getElementById("savePayment").onclick = () => {
+  const method = document.getElementById("method").value;
+  const upi = document.getElementById("upi").value;
+  const accNo = document.getElementById("accNo").value;
+  const ifsc = document.getElementById("ifsc").value;
+  const holder = document.getElementById("holder").value;
+
+  fetch("http://localhost:5000/api/affiliate/payment-method", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({ method, upi, bank: { accNo, ifsc, holder } })
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      location.reload();
+    });
+};
+
+// -------------------- WITHDRAW BUTTON --------------------
+document.getElementById("withdrawBtn").onclick = () => {
+  fetch("http://localhost:5000/api/affiliate/withdraw", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    }
+  })
+    .then(res => res.json())
+    .then(data => alert(data.message));
+};
+</script>
+
+<script>
+// LOAD WITHDRAW HISTORY
+fetch("http://localhost:5000/api/affiliate/withdraw-history", {
+  headers: { Authorization: "Bearer " + token }
+})
+  .then(res => res.json())
+  .then(list => {
+    const box = document.getElementById("withdrawHistory");
+
+    if (list.length === 0) {
+      box.innerHTML = "<p>No withdrawal history found.</p>";
+      return;
+    }
+
+    box.innerHTML = "";
+
+    list.forEach(w => {
+      const div = document.createElement("div");
+      div.className = "history-item";
+
+      const statusClass = 
+        w.status === "Pending" ? "status-pending" :
+        w.status === "Approved" ? "status-approved" :
+        "status-rejected";
+
+      div.innerHTML = `
+        <p><strong>Amount:</strong> ₹${w.amount}</p>
+        <p><strong>Method:</strong> ${w.method}</p>
+
+        ${w.method === "UPI" 
+          ? `<p><strong>UPI:</strong> ${w.upi}</p>`
+          : `
+            <p><strong>Account No:</strong> ${w.bank.accNo}</p>
+            <p><strong>IFSC:</strong> ${w.bank.ifsc}</p>
+            <p><strong>Holder:</strong> ${w.bank.holder}</p>
+          `
+        }
+
+        <p class="${statusClass}"><strong>Status:</strong> ${w.status}</p>
+        <p><strong>Date:</strong> ${new Date(w.createdAt).toLocaleString()}</p>
+      `;
+
+      box.appendChild(div);
+    });
+  });
+</script>
+
+
+
+<script>
+  function commissionByLevel(level) {
+  switch (level) {
+    case "Silver": return 24;
+    case "Gold": return 36;
+    case "Platinum": return 54;
+    case "Diamond": return 86;
+    default: return 16; // Bronze
+  }
+}
+
+function getCommissionByLevel(level) {
+  switch (level) {
+    case "Silver": return 24;
+    case "Gold": return 36;
+    case "Platinum": return 54;
+    case "Diamond": return 86;
+    case "Bronze":
+    default:
+      return 16;
+  }
+}
+</script>
+<script>
+const LEVEL_TARGETS = {
+  "Bronze": 0,
+  "Silver": 16,
+  "Gold": 64,
+  "Platinum": 256,
+  "Diamond": 1024
+};
+
+function nextLevelName(level) {
+  if (level === "Bronze") return "Silver";
+  if (level === "Silver") return "Gold";
+  if (level === "Gold") return "Platinum";
+  if (level === "Platinum") return "Diamond";
+  
+  return null; // Diamond is max
+}
+</script>
+
+<script>
+let affiliateLevel = "Bronze"; // ⭐ Global level variable
+
+// LOAD AFFILIATE ORDERS AFTER GETTING LEVEL
+fetch("http://localhost:5000/api/affiliate/me", {
+  headers: { Authorization: "Bearer " + token }
+})
+.then(res => res.json())
+.then(data => {
+  affiliateLevel = data.level || "Bronze"; // ⭐ Save real level
+});
+
+function commissionByLevel(level) {
+  switch (level) {
+    case "Silver": return 24;
+    case "Gold": return 36;
+    case "Platinum": return 54;
+    case "Diamond": return 86;
+    default: return 16; // Bronze
+  }
+}
+
+// NOW LOAD ORDERS
+fetch("http://localhost:5000/api/affiliate/orders", {
+  headers: { Authorization: "Bearer " + token }
+})
+.then(res => res.json())
+.then(orders => {
+  const box = document.getElementById("affiliateOrders");
+
+  if (!orders || orders.length === 0) {
+    box.innerHTML = "<p>No orders found.</p>";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  orders.forEach(order => {
+    const div = document.createElement("div");
+    div.className = "history-item";
+
+    // ⭐ Use REAL AFFILIATE LEVEL
+    const possibleRate = commissionByLevel(affiliateLevel);
+
+    let productHTML = "";
+
+    order.items.forEach(item => {
+      const earningAmount = item.productEarning || 0;
+      const earningStatus = item.earningStatus || "Pending";
+
+    productHTML += `
+  <div style="margin-bottom:10px; padding:10px; background:#f9f9f9; border-radius:6px; position:relative;">
+    <img src="${item.image}" width="70" 
+         style="border-radius:5px; float:left; margin-right:10px;">
+
+    <p>Qty: ${item.qty}</p>
+    <p>Price: ₹${item.price}</p>
+
+    <p><strong>Level at Order:</strong>
+      <span class="level-badge badge-${item.affiliateLevelAtTime || 'Bronze'}">
+        ${item.affiliateLevelAtTime || "N/A"}
+      </span>
+    </p>
+
+    <p><strong>Your Commission:</strong>
+      <span style="color:green; font-weight:bold;">
+        ${
+          earningStatus === "Approved"
+            ? `₹${earningAmount}`
+            : earningStatus === "Rejected"
+            ? "₹0 (Rejected)"
+            : `₹${possibleRate * item.qty} (Possible)`
+        }
+      </span>
+    </p>
+
+    <p><strong>Status:</strong>
+      <span class="status-${earningStatus.toLowerCase()}">
+        ${earningStatus}
+      </span>
+    </p>
+
+    <!-- 🔥 NEW ALERT MESSAGE BELOW -->
+    <p style="margin-top:6px; font-size:13px; color:#555;">
+      ${
+        earningStatus === "Pending"
+          ? "<span style='color:orange;'>⚠ Commission will be released 7 days after delivery.</span>"
+          : earningStatus === "Rejected"
+          ? "<span style='color:red;'>❌ No commission. This product was returned or cancelled.</span>"
+          : ""
+      }
+    </p>
+
+    <div style="clear:both;"></div>
+  </div>
+`;
+
+    });
+
+    const totalApproved = order.items.reduce((sum, item) => {
+      return item.earningStatus === "Approved"
+        ? sum + item.productEarning
+        : sum;
+    }, 0);
+
+   div.innerHTML = `
+  <p><strong>Order ID:</strong> ${order._id}</p>
+
+  <h4>Products in this Order:</h4>
+  ${productHTML}
+
+  <p><strong>Total Earnings for this Order:</strong>
+    <span style="color:green; font-size:16px; font-weight:bold;">
+      ₹${totalApproved}
+    </span>
+  </p>
+
+  <p><strong>Order Status:</strong>
+    <span class="status-${order.status.toLowerCase()}">
+      ${order.status}
+    </span>
+  </p>
+
+  <!-- ⭐ ORDER-LEVEL ALERT MESSAGE ⭐ -->
+  <p style="margin-top:6px; font-size:13px;">
+  ${
+    order.items.every(i => i.earningStatus === "Approved")
+      ? "<span style='color:green;'>✔ Commission for this order has been successfully received.</span>"
+      : order.status === "Delivered"
+      ? "<span style='color:orange;'>⚠ Order delivered. Commission will be released after 7 days. If returned or cancelled within this period, no commission will be given.</span>"
+      : ["Return", "Returned", "Cancelled", "Cancel"].includes(order.status)
+      ? "<span style='color:red;'>❌ Order returned/cancelled. No commission will be given.</span>"
+      : "<span style='color:#555;'>⌛ Order not delivered yet.</span>"
+  }
+</p>
+
+`;
+
+
+    box.appendChild(div);
+  });
+});
+</script>
+
+<script>
+const token2 = localStorage.getItem("token");
+
+fetch("http://localhost:5000/api/affiliate/earnings", {
+  headers: { Authorization: "Bearer " + token2 }
+})
+  .then(res => res.json())
+  .then(chartData => {
+
+    // 🔥 SAFETY FIX: prevent crash
+    if (!chartData || !chartData.days || !chartData.amounts) {
+      console.log("Chart data missing:", chartData);
+      document.getElementById("earnChart").remove();
+      return;
+    }
+
+    const ctx = document.getElementById("earnChart").getContext("2d");
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: chartData.days,
+        datasets: [{
+          label: "Daily Earnings",
+          data: chartData.amounts,
+          borderColor: "green",
+          borderWidth: 3,
+          tension: 0.3,
+          pointRadius: 3,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true }
+        },
+        scales: {
+          x: { ticks: { color: "#222" } },
+          y: { 
+            ticks: { color: "#222" },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+  })
+  .catch(err => console.log("Chart error:", err));
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const copyBtn = document.getElementById("copyLink");
+  const affIdEl = document.getElementById("affiliateId");
+
+  if (copyBtn && affIdEl) {
+    copyBtn.addEventListener("click", () => {
+      const affiliateId = affIdEl.innerText.trim();
+
+      if (!affiliateId || affiliateId === "Loading...") {
+        alert("Affiliate ID not loaded yet.");
+        return;
+      }
+
+      navigator.clipboard.writeText(affiliateId)
+        .then(() => alert("Affiliate ID Copied: " + affiliateId))
+        .catch(() => alert("Failed to copy Affiliate ID"));
+    });
+  }
+});
+</script>
+
+
+</body>
+</html> 

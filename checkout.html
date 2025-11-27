@@ -42,13 +42,10 @@
     <button onclick="startPayment(checkoutData.finalAmount)" style="background:green;" >
   Pay Now (online)
 </button>
-<!-- 
 <button onclick="openCODConfirm()" 
         style="margin-top:10px; background:black; color:white; width: 100%;">
-  Cash on Delivery (COD)
+  Cash on Delivery (COD)
 </button>
--->
-
 
     <div id="orderStatus" style="margin-top:15px; color:green;"></div>
   </main>
@@ -98,7 +95,14 @@
 
  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+  
+  const urlParams = new URLSearchParams(window.location.search);
+
+
   const checkoutData = JSON.parse(sessionStorage.getItem("checkoutData") || "{}");
+const ref = checkoutData.ref || null;
+
+
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   
   const addressInfo = document.getElementById("addressInfo");
@@ -157,10 +161,12 @@ function placeCOD() {
     discount: checkoutData.discount,
     finalAmount: checkoutData.finalAmount,
     paymentMethod: "COD",
-    address: { ...a, fullAddress }
+    address: { ...a, fullAddress },
+    ref: ref
+     // ✅ ONLY use URL ref
   };
 
-  fetch("https://wahuserver.onrender.com/api/orders", {
+  fetch("http://localhost:5000/api/orders", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -171,14 +177,14 @@ function placeCOD() {
     .then(res => res.json())
     .then(data => {
       sessionStorage.removeItem("checkoutData");
-window.location.href = "order-success.html";
-
+      window.location.href = "order-success.html";
     })
     .catch(err => {
       alert("Order failed. Try again.");
       console.error(err);
     });
 }
+
 function openCODConfirm() {
   const box = document.getElementById("codConfirmBox");
   box.style.display = "block";
@@ -205,45 +211,46 @@ document.getElementById("codYes").onclick = function() {
   setTimeout(() => placeCOD(), 250); // slight delay for smooth animation
 };
 
-  // ✅ Save Order After Successful Payment
   function placeCODOrder(paymentId) {
-    const a = user.address;
-    const fullAddress = `${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}, ${a.city}, ${a.state} - ${a.pincode}`;
 
-    const orderData = {
-      items: checkoutData.cart,
-      total: checkoutData.total,
-      discount: checkoutData.discount,
-      finalAmount: checkoutData.finalAmount,
-      paymentMethod: "Razorpay",
-      address: { ...a, fullAddress },
-      razorpayPaymentId: paymentId
-    };
+  const a = user.address;
+  const fullAddress = `${a.street || ""}${a.road ? ", " + a.road : ""}${a.place ? ", " + a.place : ""}, ${a.city}, ${a.state} - ${a.pincode}`;
 
-    fetch("https://wahuserver.onrender.com/api/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(orderData)
+  const orderData = {
+    items: checkoutData.cart,
+    total: checkoutData.total,
+    discount: checkoutData.discount,
+    finalAmount: checkoutData.finalAmount,
+    paymentMethod: "Razorpay",
+    address: { ...a, fullAddress },
+    razorpayPaymentId: paymentId,
+    ref: ref
+       // ✅ FIXED
+  };
+
+  fetch("http://localhost:5000/api/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(orderData)
+  })
+    .then(res => res.json())
+    .then(data => {
+      sessionStorage.removeItem("checkoutData");
+      window.location.href = "orders.html";
     })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("orderStatus").textContent =
-          "Payment successful! Order placed.";
-        sessionStorage.removeItem("checkoutData");
-        setTimeout(() => window.location.href = "orders.html", 2000);
-      })
-      .catch(err => {
-        alert("Order failed. Try again.");
-        console.error(err);
-      });
-  }
+    .catch(err => {
+      alert("Order failed. Try again.");
+      console.error(err);
+    });
+}
+
 
  async function startPayment(totalAmount) {
   try {
-    const res = await fetch("https://wahuserver.onrender.com/api/razorpay/create-order", {
+    const res = await fetch("http://localhost:5000/api/razorpay/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: totalAmount })
@@ -319,7 +326,6 @@ document.getElementById("codYes").onclick = function() {
 
 </body>
 </html>
-
 
 
 

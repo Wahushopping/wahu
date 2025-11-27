@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Us - Wahu</title>
+
+  <style>
+    body {
+      font-family: Poppins, sans-serif;
+      background: linear-gradient(135deg, #f0f0f0, #ffffff);
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #111;
+      font-weight: 600;
+      margin-bottom: 25px;
+      font-size: 22px;
+    }
+
+    .contact-box {
+      max-width: 450px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    input, textarea {
+      width: 424px;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #d2d2d2;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: green;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0,128,0,0.2);
+    }
+
+    button {
+      margin-top: 18px;
+      width: 100%;
+      padding: 14px;
+      background: green;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0c7a0c;
+    }
+
+    #msg {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Contact Us</h2>
+
+<div class="contact-box">
+  <input type="text" id="name" placeholder="Your Name">
+  <input type="email" id="email" placeholder="Your Email">
+  <input type="text" id="subject" placeholder="Subject">
+  <textarea id="message" rows="5" placeholder="Your Message"></textarea>
+
+  <button onclick="sendMessage()">Send Message</button>
+
+  <p id="msg"></p>
+</div>
+
+<script>
+function sendMessage() {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const subject = document.getElementById("subject").value.trim();
+  const message = document.getElementById("message").value.trim();
+  const msgBox = document.getElementById("msg");
+
+  // Validation
+  if (!name || !email || !subject || !message) {
+    msgBox.innerHTML = "⚠️ Please fill out all fields.";
+    msgBox.className = "error";
+    return;
+  }
+
+  const data = { name, email, subject, message };
+
+  fetch("http://localhost:5000/api/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(data => {
+    msgBox.innerHTML = "✅ " + data.message;
+    msgBox.className = "success";
+
+    // CLEAR THE FORM AFTER SUCCESS
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("subject").value = "";
+    document.getElementById("message").value = "";
+  })
+  .catch(() => {
+    msgBox.innerHTML = "❌ Something went wrong.";
+    msgBox.className = "error";
+  });
+}
+</script>
+
+</body>
+</html>

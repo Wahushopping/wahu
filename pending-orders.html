@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Pending Earnings - Wahu Affiliate</title>
+  <style>
+    body { 
+      font-family: Poppins; 
+      padding: 20px; 
+      background: #f7f7f7; 
+    }
+
+    .box {
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-left: 4px solid orange;
+    }
+
+    .product {
+      background: #fff7e6;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border-left: 4px solid orange;
+    }
+
+    .pending {
+      color: orange;
+      font-weight: 600;
+    }
+
+    .level-badge {
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:5px;
+      font-size:12px;
+      font-weight:bold;
+      color:white;
+    }
+
+    .badge-Bronze { background:#cd7f32; }
+    .badge-Silver { background:#c0c0c0; color:black; }
+    .badge-Gold { background:#ffd700; color:black; }
+    .badge-Platinum { background:#7f8c8d; }
+    .badge-Diamond { background:#4ab4ff; }
+    header {
+  background: #ffffff;
+  padding: 12px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 15px;
+}
+
+/* Navigation Container */
+.aff-nav {
+  display: flex;
+  gap: 10px;
+  padding: 0 12px;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.nav-btn {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  color: white;
+  font-size: 15px;
+  transition: 0.25s ease;
+}
+
+/* Colors */
+.back {
+  background: #2196f3; /* Blue */
+}
+
+.rejected {
+  background: #f44336; /* Red */
+}
+
+.approved {
+  background: #4caf50; /* Green */
+}
+
+.withdraw {
+  background: #9c27b0; /* Purple */
+}
+
+/* Hover */
+.nav-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .nav-btn {
+    font-size: 13px;
+    padding: 10px 0;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <header>
+  <div class="aff-nav">
+    <a href="affiliate-dashboard.html" class="nav-btn back">Dashboard</a>
+    <a href="rejected-orders.html" class="nav-btn rejected">Rejected</a>
+    <a href="approved-orders.html" class="nav-btn approved">Earning</a>
+    <a href="payment-method.html" class="nav-btn withdraw">Withdraw</a>
+  </div>
+</header>
+
+
+
+<h2 style="color:orange;">Pending Earnings</h2>
+<p>These commissions will be released after the 7-day delivery period.</p>
+
+<div id="pendingOrders">Loading...</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+fetch("http://localhost:5000/api/affiliate/orders", {
+  headers: { Authorization: "Bearer " + token }
+})
+.then(res => res.json())
+.then(orders => {
+  const box = document.getElementById("pendingOrders");
+
+  if (!orders || orders.length === 0) {
+    box.innerHTML = "<p>No orders found.</p>";
+    return;
+  }
+
+  // ⭐ FILTER ONLY PENDING COMMISSION ITEMS
+  const pendingOrders = orders.filter(order =>
+    order.items.some(i => i.earningStatus === "Pending")
+  );
+
+  if (pendingOrders.length === 0) {
+    box.innerHTML = "<p style='color:green;'>No pending earnings.</p>";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  pendingOrders.forEach(order => {
+    let productHTML = "";
+
+    order.items
+      .filter(item => item.earningStatus === "Pending")
+      .forEach(item => {
+
+        // 🔥 FIXED MISSING VARIABLES
+        const earningStatus = item.earningStatus;
+        const earningAmount = item.productEarning || 0;
+        const possibleRate = item.possibleEarning || 0;
+
+        productHTML += `
+        <div style="margin-bottom:10px; padding:10px; background:#f9f9f9; border-radius:6px;">
+          <img src="${item.image}" width="70" 
+              style="border-radius:5px; float:left; margin-right:10px;">
+
+          <p>Qty: ${item.qty}</p>
+          <p>Price: ₹${item.price}</p>
+
+          <p><strong>Level at Order:</strong>
+            <span class="level-badge badge-${item.affiliateLevelAtTime || 'Bronze'}">
+              ${item.affiliateLevelAtTime || "N/A"}
+            </span>
+          </p>
+
+          <p><strong>Your Commission:</strong>
+            <span style="color:green; font-weight:bold;">
+              ${
+                earningStatus === "Approved"
+                  ? `₹${earningAmount}`
+                  : earningStatus === "Rejected"
+                  ? "₹0 (Rejected)"
+                  : `₹${possibleRate * item.qty} (Possible)`
+              }
+            </span>
+          </p>
+
+          <p><strong>Status:</strong> 
+            <span style="color:${earningStatus === "Pending" ? "orange" : earningStatus === "Approved" ? "green" : "red"};">
+              ${earningStatus}
+            </span>
+          </p>
+
+          <p style="margin-top:6px; font-size:13px; color:#555;">
+            ${
+              earningStatus === "Pending"
+                ? "<span style='color:orange;'>⚠ Commission will be released 7 days after delivery.</span>"
+                : earningStatus === "Rejected"
+                ? "<span style='color:red;'>❌ No commission. This product was returned or cancelled.</span>"
+                : ""
+            }
+          </p>
+
+          <div style="clear:both;"></div>
+        </div>
+        `;
+    });
+
+    const totalApproved = order.items.reduce((sum, item) => {
+      return item.earningStatus === "Approved"
+        ? sum + (item.productEarning || 0)
+        : sum;
+    }, 0);
+
+    // FIXED: div was not defined
+    const div = document.createElement("div");
+    div.className = "box";
+
+    div.innerHTML = `
+      <p><strong>Order ID:</strong> ${order._id}</p>
+
+      <h4>Products in this Order:</h4>
+      ${productHTML}
+
+      <p><strong>Total Approved Earnings:</strong>
+        <span style="color:green; font-size:16px; font-weight:bold;">
+          ₹${totalApproved}
+        </span>
+      </p>
+
+      <p><strong>Order Status:</strong>
+        <span style="color:${
+          order.status === "Delivered"
+            ? "green"
+            : order.status === "Pending"
+            ? "orange"
+            : "red"
+        };">
+          ${order.status}
+        </span>
+      </p>
+
+      <p style="margin-top:6px; font-size:13px;">
+        ${
+          order.items.every(i => i.earningStatus === "Approved")
+            ? "<span style='color:green;'>✔ All commissions for this order received.</span>"
+            : order.status === "Delivered"
+            ? "<span style='color:orange;'>⚠ Delivered. Commission will be released after 7 days.</span>"
+            : ["Return", "Returned", "Cancelled", "Cancel"].includes(order.status)
+            ? "<span style='color:red;'>❌ Returned or cancelled. No commission.</span>"
+            : "<span style='color:#555;'>⌛ Order not delivered yet.</span>"
+        }
+      </p>
+    `;
+
+    box.appendChild(div);
+  });
+});
+</script>
+
+</body>
+</html>

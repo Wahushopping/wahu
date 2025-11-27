@@ -34,7 +34,7 @@
     <h2>Your Shopping Cart</h2>
     <div id="cart-items" class="product-grid"></div>
 
-    <!-- Coupons -->
+    <!-- 
     <div class="div1">
       <div style="margin-top: 20px; text-align: left; padding-left: 10px; padding-top: 14px; padding-bottom: 20px;">
         <h4>Select a Coupon:</h4>
@@ -42,7 +42,7 @@
         <label><input type="radio" name="coupon" value="100" data-min="1000"> ₹100 Off on ₹1000+</label><br>
         <label><input type="radio" name="coupon" value="300" data-min="2000"> ₹300 Off on ₹2000+</label>
       </div>
-    </div>
+    </div> Coupons -->
 
     <!-- Cart Summary -->
     <div class="div2">
@@ -98,7 +98,7 @@
 
       // Fetch cart
       if (token) {
-        fetch("https://wahuserver.onrender.com/api/cart", {
+        fetch("http://localhost:5000/api/cart", {
           headers: { Authorization: `Bearer ${token}` }
         })
           .then(res => res.json())
@@ -143,6 +143,7 @@
                 </div>
               </div>
               <div class="product-price">
+                
                 <p>Price: <strong style="color:black">₹${price}</strong></p>
                 <p>Subtotal: <strong style="color:green">₹${price * qty}</strong></p>
                 <button onclick="removeItem(${index})" class="remove-btn">Remove</button>
@@ -178,7 +179,7 @@
         cart[index].qty = updatedQty;
 
         if (token) {
-          fetch("https://wahuserver.onrender.com/api/cart", {
+          fetch("http://localhost:5000/api/cart", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -206,7 +207,7 @@
         cart.splice(index, 1);
 
         if (token) {
-          fetch("https://wahuserver.onrender.com/api/cart", {
+          fetch("http://localhost:5000/api/cart", {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -235,12 +236,14 @@
         const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
         const finalAmount = cartTotal >= minAmount ? cartTotal - discount : cartTotal;
 
-        sessionStorage.setItem("checkoutData", JSON.stringify({
-          cart,
-          discount,
-          total: cartTotal,
-          finalAmount
-        }));
+       sessionStorage.setItem("checkoutData", JSON.stringify({
+  cart,
+  discount,
+  total: cartTotal,
+  finalAmount,
+  ref: cart.find(i => i.ref)?.ref || null   // ⭐ pick ref from any cart item
+}));
+
 
         if (!token) {
           alert("Please log in to place your order.");
@@ -306,4 +309,3 @@
 </body>
 
 </html>
-

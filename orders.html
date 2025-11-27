@@ -105,7 +105,7 @@ function requestReturn(orderId, itemId) {
     bank,
   };
 
-  fetch(`https://wahuserver.onrender.com/api/orders/${orderId}/return`, {
+  fetch(`http://localhost:5000/api/orders/${orderId}/return`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -130,7 +130,7 @@ function requestReturn(orderId, itemId) {
 
 
 // Fetch orders
-fetch("https://wahuserver.onrender.com/api/orders/my", {
+fetch("http://localhost:5000/api/orders/my", {
   method:"GET",
   headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` }
 })
@@ -146,7 +146,7 @@ fetch("https://wahuserver.onrender.com/api/orders/my", {
     <p><strong>Phone:</strong> ${order.address?.phone || ""}</p>
     <p><strong>Total:</strong> ₹${order.total}</p>
 
-    ${order.status === 'Lucky'
+   ${order.status === 'Lucky'
   ? `
     <p style="color:green;font-weight:bold;font-size:16px;">
       🎉 Check your ticket number after 24 hours. Login this no. ${order.address?.phone || ""}. 🎉 
@@ -157,6 +157,7 @@ fetch("https://wahuserver.onrender.com/api/orders/my", {
   `
   : ''
 }
+
 
     ${order.items.map((item,index)=>`
       <div style="display:flex; gap:10px; border:2px solid #ccc; padding:5px; border-radius:5px; margin-top:5px;">
@@ -219,5 +220,3 @@ function toggleStatusView(trackerId,btn){
 
 </body>
 </html>
-
-

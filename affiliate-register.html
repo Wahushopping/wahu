@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Affiliate Program - Wahu</title>
+
+  <style>
+    body {
+      font-family: Poppins, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      font-size: 22px;
+      color: #222;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn-activate { background: #28a745; color: white; }
+    .btn-reject { background: #dc3545; color: white; }
+    .btn-approve { background: #007bff; color: white; }
+
+    .msg {
+      margin-top: 10px;
+      font-weight: bold;
+      color: green;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+
+    .level-box {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      border-left: 4px solid green;
+    }
+
+    .level-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #222;
+    }
+
+    .highlight {
+      font-weight: bold;
+      color: green;
+    }
+    /* Top Right Affiliate Badge */
+.affiliate-badge {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: #e100ff;
+  color: white;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  z-index: 9999;
+}
+.level-box {
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border-left: 4px solid #28a745;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.level-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #222;
+}
+
+.highlight {
+  font-weight: bold;
+  color: #28a745;
+}
+
+  </style>
+</head>
+
+<body>
+
+<h2>Affiliate Program</h2>
+<div id="affiliateBadge" class="affiliate-badge" style="display:none;">
+  Affiliate ID: <span id="affIdText"></span>
+</div>
+<!-- ACTIVATION BOX -->
+<div class="card">
+  <p style="font-size:15px;">
+    Become a WAHU Affiliate and earn commission from every successful order
+    placed using your referral link.
+  </p>
+
+  <button id="activateBtn" class="btn btn-activate">Activate Affiliate Account</button>
+  <p id="msg" class="msg"></p>
+</div>
+
+<!-- LEVELS INFORMATION -->
+<div class="card">
+  <h3>Your Affiliate Levels</h3>
+<!-- TOP RIGHT AFFILIATE ID DISPLAY -->
+
+
+ <div class="level-box">
+  <div class="level-title">🥉 Bronze Level</div>
+  <p>Complete <span class="highlight">16 Orders</span> → Commission: <span class="highlight">₹16 / order</span></p>
+</div>
+
+<div class="level-box">
+  <div class="level-title">🥈 Silver Level</div>
+  <p>Complete <span class="highlight">64 Orders</span> → Commission: <span class="highlight">₹24 / order</span></p>
+</div>
+
+<div class="level-box">
+  <div class="level-title">🏅 Gold Level</div>
+  <p>Complete <span class="highlight">256 Orders</span> → Commission: <span class="highlight">₹36 / order</span></p>
+</div>
+
+<div class="level-box">
+  <div class="level-title">💎 Platinum Level</div>
+  <p>Complete <span class="highlight">1024 Orders</span> → Commission: <span class="highlight">₹54 / order</span></p>
+</div>
+
+<div class="level-box">
+  <div class="level-title">🔷 Diamond Level</div>
+  <p>Complete <span class="highlight">4096 Orders</span> → Commission: <span class="highlight">₹86 / order</span></p>
+</div>
+
+
+  
+<!-- HOW IT WORKS -->
+<div class="card">
+  <h3>How Affiliate Works?</h3>
+  <ul>
+    <li>Go to <b>Profile → Become an Affiliate</b></li>
+    <li>Click <b>Activate Affiliate Account</b> to get your unique affiliate ID</li>
+    <li>Your ID looks like: <b>WAHU12345</b></li>
+    <li>Open any product → Scroll Down → Click <b>Share</b></li>
+    <li>You will get your referral link → Share anywhere (WhatsApp, Facebook, Instagram)</li>
+    <li>If anyone buys using your link → You earn commission</li>
+    <li>Commission is credited only when order status becomes <b>Successful</b></li>
+    <li>No commission for <b>Returned / Cancelled</b> orders</li>
+  </ul>
+</div>
+
+<!-- WITHDRAW RULES -->
+<div class="card">
+  <h3>Withdraw Rules</h3>
+  <ul>
+    <li>You can request withdrawal anytime</li>
+    <li>Company platform fee: <b>6% deduction</b></li>
+    <li>Amount is credited to your UPI / Bank within <b>48 hours</b></li>
+  </ul>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+document.getElementById("activateBtn").onclick = () => {
+  fetch("http://localhost:5000/api/affiliate/activate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.affiliateId) {
+      localStorage.setItem("affiliateId", data.affiliateId);
+
+      document.getElementById("msg").innerHTML =
+        "🎉 Affiliate Activated! Your ID: <b>" + data.affiliateId + "</b>";
+
+    } else {
+      document.getElementById("msg").innerText = data.message;
+    }
+  });
+};
+</script>
+<script>
+  // Show Affiliate ID at top-right if activated
+  const affId = localStorage.getItem("affiliateId");
+
+  if (affId) {
+    document.getElementById("affiliateBadge").style.display = "inline-block";
+    document.getElementById("affIdText").innerText = affId;
+  }
+</script>
+
+</body>
+</html>

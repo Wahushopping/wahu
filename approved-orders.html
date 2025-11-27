@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Approved Earnings - Wahu Affiliate</title>
+
+  <style>
+    body { 
+      font-family: Poppins; 
+      padding: 20px; 
+      background: #f7f7f7; 
+    }
+
+    .box {
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-left: 4px solid green;
+    }
+
+    .product {
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .product img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .success {
+      color: green;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    /* LEVEL BADGES */
+    .level-badge {
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:5px;
+      font-size:12px;
+      font-weight:bold;
+      color:white;
+      margin-left:4px;
+    }
+
+    .badge-Bronze { background:#cd7f32; }
+    .badge-Silver { background:#c0c0c0; color:black; }
+    .badge-Gold { background:#ffd700; color:black; }
+    .badge-Platinum { background:#7f8c8d; }
+    .badge-Diamond { background:#4ab4ff; }
+    /* Header Container */
+header {
+  background: #ffffff;
+  padding: 12px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 15px;
+}
+
+/* Navigation Row */
+.aff-nav {
+  display: flex;
+  gap: 10px;
+  padding: 0 12px;
+  flex-wrap: wrap;
+}
+
+/* Base Button Style */
+.nav-btn {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  color: white;
+  font-size: 15px;
+  transition: 0.25s ease;
+}
+
+/* Button Colors */
+.back {
+  background: #2196f3;   /* Blue */
+}
+
+.pending {
+  background: #ff9800;   /* Orange */
+  color: black;          /* Better contrast */
+}
+
+.rejected {
+  background: #f44336;   /* Red */
+}
+
+.withdraw {
+  background: #673ab7;   /* Purple */
+}
+
+/* Hover animation */
+.nav-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .nav-btn {
+    font-size: 13px;
+    padding: 10px 0;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <header>
+  <div class="aff-nav">
+    <a href="affiliate-dashboard.html" class="nav-btn back">Dashboard</a>
+    <a href="pending-orders.html" class="nav-btn pending">Pending</a>
+    <a href="rejected-orders.html" class="nav-btn rejected">Rejected</a>
+    <a href="payment-method.html" class="nav-btn withdraw">Withdraw</a>
+  </div>
+</header>
+
+
+<h2 style="color:green;">Approved Earnings</h2>
+<p>Showing only orders where commission has been successfully received.</p>
+
+<div id="approvedOrders">Loading...</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+fetch("http://localhost:5000/api/affiliate/orders", {
+  headers: { Authorization: "Bearer " + token }
+})
+.then(res => res.json())
+.then(orders => {
+  const box = document.getElementById("approvedOrders");
+
+  if (!orders || orders.length === 0) {
+    box.innerHTML = "<p>No orders found.</p>";
+    return;
+  }
+
+  // ⭐ Filter orders where ALL items are approved
+  const approvedOrders = orders.filter(order =>
+    order.items.every(i => i.earningStatus === "Approved")
+  );
+
+  if (approvedOrders.length === 0) {
+    box.innerHTML = "<p>No approved earnings yet.</p>";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  approvedOrders.forEach(order => {
+    let productHTML = "";
+
+    order.items.forEach(item => {
+      productHTML += `
+        <div class="product">
+          <img src="${item.image}" alt="Product">
+
+          <div>
+            <p><strong>${item.title}</strong></p>
+
+            <p>
+              Level:
+              <span class="level-badge badge-${item.affiliateLevelAtTime}">
+                ${item.affiliateLevelAtTime}
+              </span>
+            </p>
+
+            <p>Qty: ${item.qty}</p>
+            <p>Price: ₹${item.price}</p>
+
+            <p>Your Commission: 
+              <strong style="color:green;">₹${item.productEarning || 0}</strong>
+            </p>
+          </div>
+        </div>
+      `;
+    });
+
+    const totalEarned = order.items.reduce((sum, item) => {
+      return sum + (item.productEarning || 0);
+    }, 0);
+
+    const div = document.createElement("div");
+    div.className = "box";
+
+    div.innerHTML = `
+      <p><strong>Order ID:</strong> ${order._id}</p>
+
+      <p><strong>Order Status:</strong> 
+        <span style="color:green;">${order.status}</span>
+      </p>
+
+      <h4>Products:</h4>
+      ${productHTML}
+
+      <p><strong>Total Commission Earned:</strong>
+        <span style="color:green;font-size:16px;font-weight:bold;">
+          ₹${totalEarned}
+        </span>
+      </p>
+
+      <p class="success">✔ Commission for this order has been successfully received.</p>
+    `;
+
+    box.appendChild(div);
+  });
+});
+</script>
+
+</body>
+</html>

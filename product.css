@@ -332,6 +332,33 @@ h6{
   flex: 1;
 }
 
+#mainProductImage {
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+#mainProductImage:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
 
 
+/* Smooth slide animation */
+#mainProductImage {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.slide-left {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-right {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-reset {
+  transform: translateX(0);
+  opacity: 1;
+}
 
