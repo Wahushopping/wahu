@@ -198,7 +198,7 @@ document.getElementById("method").onchange = () => {
   document.getElementById("holder").style.display = m === "Bank" ? "block" : "none";
 };
 
-fetch("http://localhost:5000/api/affiliate/me", {
+fetch("https://wahuserver.onrender.com/api/affiliate/me", {
   headers: { Authorization: "Bearer " + token }
 })
 .then(res => res.json())
@@ -262,7 +262,7 @@ document.getElementById("savePayment").onclick = () => {
 document.getElementById("withdrawBtn").onclick = async () => {
 
   // 1️⃣ Fetch affiliate data
-  const res = await fetch("http://localhost:5000/api/affiliate/me", {
+  const res = await fetch("https://wahuserver.onrender.com/api/affiliate/me", {
     headers: { Authorization: "Bearer " + token }
   });
 
@@ -287,7 +287,7 @@ document.getElementById("withdrawBtn").onclick = async () => {
   )) return;
 
   // 4️⃣ SEND ONLY finalAmount to backend
-  fetch("http://localhost:5000/api/affiliate/withdraw", {
+  fetch("https://wahuserver.onrender.com/api/affiliate/withdraw", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -310,7 +310,7 @@ document.getElementById("withdrawBtn").onclick = async () => {
 /* ---------------------------------------------
    LOAD WITHDRAW HISTORY  (FIXED WITH FEE DETAILS)
 -----------------------------------------------*/
-fetch("http://localhost:5000/api/affiliate/withdraw-history", {
+fetch("https://wahuserver.onrender.com/api/affiliate/withdraw-history", {
   headers: { Authorization: "Bearer " + token }
 })
 .then(res => res.json())
@@ -394,3 +394,4 @@ fetch("http://localhost:5000/api/affiliate/withdraw-history", {
 
 </body>
 </html>
+
