@@ -105,7 +105,7 @@ function requestReturn(orderId, itemId) {
     bank,
   };
 
-  fetch(`http://localhost:5000/api/orders/${orderId}/return`, {
+  fetch(`https://wahuserver.onrender.com/api/orders/${orderId}/return`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -130,7 +130,7 @@ function requestReturn(orderId, itemId) {
 
 
 // Fetch orders
-fetch("http://localhost:5000/api/orders/my", {
+fetch("https://wahuserver.onrender.com/api/orders/my", {
   method:"GET",
   headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` }
 })
@@ -220,3 +220,4 @@ function toggleStatusView(trackerId,btn){
 
 </body>
 </html>
+
