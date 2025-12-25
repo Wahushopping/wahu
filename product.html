@@ -115,9 +115,9 @@
 
       if (navigator.sendBeacon) {
         const blob = new Blob([payload], { type: "application/json" });
-        navigator.sendBeacon("http://localhost:5000/api/affiliate/click", blob);
+        navigator.sendBeacon("https://wahuserver.onrender.com/api/affiliate/click", blob);
       } else {
-        fetch("http://localhost:5000/api/affiliate/click", {
+        fetch("https://wahuserver.onrender.com/api/affiliate/click", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: payload
@@ -154,7 +154,7 @@
     // Fetch product details
     async function fetchProductDetails() {
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${productId}`);
+        const res = await fetch(`https://wahuserver.onrender.com/api/products/${productId}`);
         const product = await res.json();
         currentProduct = product;
 
@@ -351,7 +351,7 @@ async function addToCart(product) {
 
 
   try {
-    const res = await fetch("http://localhost:5000/api/cart", {
+    const res = await fetch("https://wahuserver.onrender.com/api/cart", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -401,7 +401,7 @@ async function toggleWishlist(product) {
   };
 
   try {
-    const res = await fetch("http://localhost:5000/api/wishlist/toggle", {
+    const res = await fetch("https://wahuserver.onrender.com/api/wishlist/toggle", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -459,7 +459,7 @@ shareBtn.addEventListener("click", () => {
     // Related products logic
     async function fetchRelatedProducts(currentProduct) {
       try {
-        const res = await fetch("http://localhost:5000/api/products");
+        const res = await fetch("https://wahuserver.onrender.com/api/products");
         const allProducts = await res.json();
         const related = allProducts
           .filter(p => p._id !== currentProduct._id && p.option === currentProduct.option)
@@ -548,3 +548,4 @@ shareBtn.addEventListener("click", () => {
 
 </body>
 </html>
+
