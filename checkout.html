@@ -186,7 +186,7 @@ function placeCOD() {
      // ✅ ONLY use URL ref
   };
 
-  fetch("http://localhost:5000/api/orders", {
+  fetch("https://wahuserver.onrender.com/api/orders", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -248,7 +248,7 @@ document.getElementById("codYes").onclick = function() {
        // ✅ FIXED
   };
 
-  fetch("http://localhost:5000/api/orders", {
+  fetch("https://wahuserver.onrender.com/api/orders", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -270,7 +270,7 @@ document.getElementById("codYes").onclick = function() {
 
  async function startPayment(totalAmount) {
   try {
-    const res = await fetch("http://localhost:5000/api/razorpay/create-order", {
+    const res = await fetch("https://wahuserver.onrender.com/api/razorpay/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: totalAmount })
@@ -349,6 +349,7 @@ function goToAddressPage() {
 
 </body>
 </html>
+
 
 
 
