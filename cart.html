@@ -98,7 +98,7 @@
 
       // Fetch cart
       if (token) {
-        fetch("https://wahuserver.onrender.com/api/cart", {
+        fetch("http://localhost:5000/api/cart", {
           headers: { Authorization: `Bearer ${token}` }
         })
           .then(res => res.json())
@@ -179,7 +179,7 @@
         cart[index].qty = updatedQty;
 
         if (token) {
-          fetch("https://wahuserver.onrender.com/api/cart", {
+          fetch("http://localhost:5000/api/cart", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -207,7 +207,7 @@
         cart.splice(index, 1);
 
         if (token) {
-          fetch("https://wahuserver.onrender.com/api/cart", {
+          fetch("http://localhost:5000/api/cart", {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
@@ -309,4 +309,3 @@
 </body>
 
 </html>
-

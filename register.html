@@ -19,7 +19,31 @@
     <form id="registerForm">
       <input type="text" id="name" placeholder="Full Name" required />
       <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Password" required />
+      <!-- Password -->
+<div style="position: relative; margin-bottom:10px;">
+  <input type="password" id="password" placeholder="Password" required />
+
+  <span id="eyeIcon1"
+        onclick="togglePassword('password','eyeIcon1')"
+        style="position:absolute; right:12px; top:50%; transform:translateY(-50%);
+               cursor:pointer; font-size:26px; padding-right: 10px;">
+    👁
+  </span>
+</div>
+
+<!-- Confirm Password -->
+<div style="position: relative;">
+  <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+
+  <span id="eyeIcon2"
+        onclick="togglePassword('confirmPassword','eyeIcon2')"
+        style="position:absolute; right:12px; top:50%; transform:translateY(-50%);
+               cursor:pointer; font-size:26px; padding-right: 10px;">
+    👁
+  </span>
+</div>
+
+
       <button type="submit">Register</button>
     </form>
     <p>Already have an account? <a href="login.html">Login</a></p>
@@ -28,30 +52,51 @@
   <script>
     const registerForm = document.getElementById("registerForm");
 
-    registerForm.addEventListener("submit", function (e) {
-      e.preventDefault();
+   registerForm.addEventListener("submit", function (e) {
+  e.preventDefault();
 
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
 
-      fetch("https://wahuserver.onrender.com/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password })
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.message === "User registered successfully") {
-            alert("Registration successful! You can now log in.");
-            window.location.href = "login.html";
-          } else {
-            alert(data.message || "Registration failed");
-          }
-        });
-    });
+  if (password !== confirmPassword) {
+    alert("Passwords do not match!");
+    return;
+  }
+
+  fetch("http://localhost:5000/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.message === "User registered successfully") {
+      alert("Registration successful! You can now log in.");
+      window.location.href = "login.html";
+    } else {
+      alert(data.message || "Registration failed");
+    }
+  });
+});
+
   </script>
+<script>
+function togglePassword(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+
+  if (input.type === "password") {
+    input.type = "text";
+    icon.textContent = "🙈"; // closed eye
+  } else {
+    input.type = "password";
+    icon.textContent = "👁"; // open eye
+  }
+}
+</script>
+
 
 </body>
 </html>
-

@@ -146,7 +146,7 @@ header {
 <script>
 const token = localStorage.getItem("token");
 
-fetch("https://wahuserver.onrender.com/api/affiliate/orders", {
+fetch("http://localhost:5000/api/affiliate/orders", {
   headers: { Authorization: "Bearer " + token }
 })
 .then(res => res.json())
@@ -226,4 +226,3 @@ fetch("https://wahuserver.onrender.com/api/affiliate/orders", {
 
 </body>
 </html>
-

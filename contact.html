@@ -110,7 +110,7 @@ function sendMessage() {
 
   const data = { name, email, subject, message };
 
-  fetch("https://wahuserver.onrender.com/api/contact", {
+  fetch("http://localhost:5000/api/contact", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -135,4 +135,3 @@ function sendMessage() {
 
 </body>
 </html>
-

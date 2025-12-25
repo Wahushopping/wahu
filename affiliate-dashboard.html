@@ -320,7 +320,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const token = localStorage.getItem("token");
-fetch("https://wahuserver.onrender.com/api/affiliate/analytics", {
+fetch("http://localhost:5000/api/affiliate/analytics", {
   headers: { Authorization: "Bearer " + token }
 })
 .then(res => res.json())
@@ -349,7 +349,7 @@ fetch("https://wahuserver.onrender.com/api/affiliate/analytics", {
 });
 
 // Load affiliate data
-fetch("https://wahuserver.onrender.com/api/affiliate/me", {
+fetch("http://localhost:5000/api/affiliate/me", {
   headers: { Authorization: "Bearer " + token }
 })
   .then(res => res.json())
@@ -419,7 +419,7 @@ if (next) {
     loadPaymentDetails(data);
 
     // ⭐⭐⭐ EARNINGS CHART ⭐⭐⭐
-fetch("https://wahuserver.onrender.com/api/affiliate/earnings", {
+fetch("http://localhost:5000/api/affiliate/earnings", {
   headers: { Authorization: "Bearer " + token }
 })
   .then(res => res.json())
@@ -499,7 +499,7 @@ document.getElementById("savePayment").onclick = () => {
   const ifsc = document.getElementById("ifsc").value;
   const holder = document.getElementById("holder").value;
 
-  fetch("https://wahuserver.onrender.com/api/affiliate/payment-method", {
+  fetch("http://localhost:5000/api/affiliate/payment-method", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -516,7 +516,7 @@ document.getElementById("savePayment").onclick = () => {
 
 // -------------------- WITHDRAW BUTTON --------------------
 document.getElementById("withdrawBtn").onclick = () => {
-  fetch("https://wahuserver.onrender.com/api/affiliate/withdraw", {
+  fetch("http://localhost:5000/api/affiliate/withdraw", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -530,7 +530,7 @@ document.getElementById("withdrawBtn").onclick = () => {
 
 <script>
 // LOAD WITHDRAW HISTORY
-fetch("https://wahuserver.onrender.com/api/affiliate/withdraw-history", {
+fetch("http://localhost:5000/api/affiliate/withdraw-history", {
   headers: { Authorization: "Bearer " + token }
 })
   .then(res => res.json())
@@ -623,7 +623,7 @@ function nextLevelName(level) {
 let affiliateLevel = "Bronze"; // ⭐ Global level variable
 
 // LOAD AFFILIATE ORDERS AFTER GETTING LEVEL
-fetch("https://wahuserver.onrender.com/api/affiliate/me", {
+fetch("http://localhost:5000/api/affiliate/me", {
   headers: { Authorization: "Bearer " + token }
 })
 .then(res => res.json())
@@ -642,7 +642,7 @@ function commissionByLevel(level) {
 }
 
 // NOW LOAD ORDERS
-fetch("https://wahuserver.onrender.com/api/affiliate/orders", {
+fetch("http://localhost:5000/api/affiliate/orders", {
   headers: { Authorization: "Bearer " + token }
 })
 .then(res => res.json())
@@ -766,7 +766,7 @@ fetch("https://wahuserver.onrender.com/api/affiliate/orders", {
 <script>
 const token2 = localStorage.getItem("token");
 
-fetch("https://wahuserver.onrender.com/api/affiliate/earnings", {
+fetch("http://localhost:5000/api/affiliate/earnings", {
   headers: { Authorization: "Bearer " + token2 }
 })
   .then(res => res.json())
@@ -839,4 +839,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html> 
-

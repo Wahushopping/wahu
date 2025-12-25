@@ -21,11 +21,20 @@
     <h2>Confirm Your Order</h2>
 
     <!-- Address -->
-    <section style="margin-bottom:20px;">
-      <h3>Shipping Address</h3>
-      <div id="addressInfo" style="background:#f0f0f0; padding:10px; border-radius:5px;"></div>
-      <button onclick="window.location.href='address.html'" style="margin-top:10px;">Change Address</button>
-    </section>
+    <!-- Address -->
+<section style="margin-bottom:20px;">
+  <h3>Shipping Address</h3>
+
+  <div id="addressInfo"
+       style="background:#f0f0f0; padding:10px; border-radius:5px; margin-bottom:10px;">
+  </div>
+
+  <button id="addressBtn"
+          onclick="goToAddressPage()"
+          style="width:100%; background:#007bff; color:#fff; padding:10px; border:none; border-radius:5px;">
+  </button>
+</section>
+
 
     <!-- Order Items -->
     <section id="orderItems" style="margin-bottom:20px;"></section>
@@ -113,18 +122,29 @@ const ref = checkoutData.ref || null;
     window.location.href = "cart.html";
   }
 
-  // Display Address
-  if (user && user.address && user.address.city) {
-    const a = user.address;
-    addressInfo.innerHTML = `
-      ${a.name || ""}<br>
-      ${a.street || ""} ${a.road || ""}, ${a.place || ""}<br>
-      ${a.city}, ${a.state} - ${a.pincode}<br>
-      Phone: ${a.phone}
-    `;
-  } else {
-    addressInfo.innerHTML = `<span style="color:red;">No address found.</span>`;
-  }
+  const addressBtn = document.getElementById("addressBtn");
+
+// Display Address
+if (user && user.address && user.address.city) {
+  const a = user.address;
+
+  addressInfo.innerHTML = `
+    <strong>${a.name || ""}</strong><br>
+    ${a.street || ""} ${a.road || ""}, ${a.place || ""}<br>
+    ${a.city}, ${a.state} - ${a.pincode}<br>
+    Phone: ${a.phone}
+  `;
+
+  addressBtn.innerText = "Change Address";
+
+} else {
+  addressInfo.innerHTML = `
+    <span style="color:red;">No address added yet.</span>
+  `;
+
+  addressBtn.innerText = "Add Address";
+}
+
 
   // Display Cart Items
   checkoutData.cart.forEach(item => {
@@ -166,7 +186,7 @@ function placeCOD() {
      // ✅ ONLY use URL ref
   };
 
-  fetch("https://wahuserver.onrender.com/api/orders", {
+  fetch("http://localhost:5000/api/orders", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -228,7 +248,7 @@ document.getElementById("codYes").onclick = function() {
        // ✅ FIXED
   };
 
-  fetch("https://wahuserver.onrender.com/api/orders", {
+  fetch("http://localhost:5000/api/orders", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -250,7 +270,7 @@ document.getElementById("codYes").onclick = function() {
 
  async function startPayment(totalAmount) {
   try {
-    const res = await fetch("https://wahuserver.onrender.com/api/razorpay/create-order", {
+    const res = await fetch("http://localhost:5000/api/razorpay/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: totalAmount })
@@ -294,6 +314,9 @@ document.getElementById("codYes").onclick = function() {
     console.error("Payment start error:", err);
   }
 }
+function goToAddressPage() {
+  window.location.href = "address.html";
+}
 
 
 </script>
@@ -326,7 +349,6 @@ document.getElementById("codYes").onclick = function() {
 
 </body>
 </html>
-
 
 
 

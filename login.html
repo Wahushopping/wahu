@@ -5,87 +5,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Wahu</title>
   <link rel="stylesheet" href="login.css"/>
-  
 </head>
+
 <body>
 
-  <header>
-    <div class="logo"><img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg" style="width: 100px; padding-top: 10px; border-radius:5px;"></div>
-    
-  </header>
-   <div class="content">
+<header>
+  <div class="logo">
+    <img src="image/WhatsApp Image 2025-07-30 at 22.14.43_da49cc2e.jpg"
+         style="width:100px; padding-top:10px; border-radius:5px;">
+  </div>
+</header>
+
+<div class="content">
   <main class="form-page">
     <h1>Login</h1>
+
     <form id="loginForm">
       <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Password" required />
+    <div style="position: relative;">
+  <input type="password" id="password" placeholder="Password" required />
+
+  <span id="eyeIcon"
+        onclick="togglePassword()"
+        style="position:absolute; right:12px; top:50%; transform:translateY(-50%);
+               cursor:pointer; font-size:26px;padding-right: 10px;">
+    👁
+  </span>
+</div>
+
+
+
+
       <button type="submit">Login</button>
     </form>
-    <p>Don't have an account? <a href="register.html">Register</a></p>
+
+    <!-- 🔔 Added Forgot Password -->
+    <p><a href="forgot-password.html" style="color:blue;">Forgot Password?</a></p>
+
+    <p>Don't have an account? <a href="register.html" style="padding: 3px; background-color: rgb(255, 255, 255); border-radius: 4px; color:rgb(19, 15, 255); font-weight: 600;">Register</a></p>
   </main>
-   </div>
-  <script>
-    const loginForm = document.getElementById("loginForm");
+</div>
 
-    loginForm.addEventListener("submit", function (e) {
-      e.preventDefault();
+<script>
+  const loginForm = document.getElementById("loginForm");
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+  loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-      fetch("https://wahuserver.onrender.com/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.token) {
-            // Save token + user info
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("user", JSON.stringify({ name: data.name, email: data.email }));
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.token) {
+          alert(data.message || "Login failed");
+          return;
+        }
+
+        // Save user details
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify({
+          name: data.name,
+          email: data.email,
+          role: data.role
+        }));
+
+        // Clear old cart
+        localStorage.removeItem("cart");
+
+        // Fetch user's cart
+        fetch("http://localhost:5000/api/cart", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${data.token}`
+          }
+        })
+          .then(res => res.json())
+          .then(cartData => {
+            localStorage.setItem("cart", JSON.stringify(cartData.items || []));
             alert("Login successful!");
             window.location.href = "index.html";
-          } else {
-            alert(data.message || "Login failed");
-          }
-        });
-    });
-
-  if (data.token) {
-  // Save user
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("user", JSON.stringify({
-    name: data.name,
-    email: data.email,
-    role: data.role
-  }));
-
-  // ✅ Clear old cart
-  localStorage.removeItem("cart");
-
-  // ✅ Fetch current user's cart from server
-  fetch("https://wahuserver.onrender.com/api/cart", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${data.token}`
-    }
-  })
-    .then(res => res.json())
-    .then(cartData => {
-      localStorage.setItem("cart", JSON.stringify(cartData.items || []));
-      alert("Login successful!");
-      window.location.href = "index.html";
-    })
-    .catch(() => {
-      alert("Login successful, but failed to load cart.");
-      window.location.href = "index.html";
-    });
-}
-
+          })
+          .catch(() => {
+            alert("Login successful, but failed to load cart.");
+            window.location.href = "index.html";
+          });
+      });
+  });
 
 </script>
+<script>
+function togglePassword() {
+  const passwordInput = document.getElementById("password");
+  const eyeIcon = document.getElementById("eyeIcon");
+
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";     // show password
+    eyeIcon.textContent = "🙈";       // eye closed
+  } else {
+    passwordInput.type = "password"; // hide password
+    eyeIcon.textContent = "👁";       // eye open
+  }
+}
+</script>
+
+
 
 </body>
 </html>
-

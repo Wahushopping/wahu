@@ -186,7 +186,7 @@
 const token = localStorage.getItem("token");
 
 document.getElementById("activateBtn").onclick = () => {
-  fetch("https://wahuserver.onrender.com/api/affiliate/activate", {
+  fetch("http://localhost:5000/api/affiliate/activate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -219,4 +219,3 @@ document.getElementById("activateBtn").onclick = () => {
 
 </body>
 </html>
-
